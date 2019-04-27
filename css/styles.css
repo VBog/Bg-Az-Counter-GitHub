@@ -1,0 +1,91 @@
+/* 	Виджеты Популярные записи 
+	и Сейчас на сайте*/
+.widget-item .bg-az-top-posts {
+	margin: 5px;
+	padding: 0;
+}
+.widget-item .bg-az-top-posts li,
+.widget-item .bg-az-counter p {
+	margin: 0px;
+	padding: 5px;
+	list-style-type: none;
+}
+.widget-item .bg-az-top-posts>li:before {
+	content: '';
+	display: inline-block;
+	width: 4px;
+	height: 4px;
+	margin-right: 5px;
+	vertical-align: middle;
+	background: #90694a;
+	border: none;
+	border-radius: 50%;
+}
+.widget-item li a,
+.widget-item .bg-az-counter p {
+	color: #90694a;
+}
+.widget-item li .bg-az-count,
+.widget-item p .bg-az-counter-now,
+.widget-item p .bg-az-counter-views,
+.widget-item p .bg-az-counter-posts  {
+	color: #999;
+}
+.widget-item li:hover {
+	background: #fff;
+	color: #e88f57;
+	transition: all .4s ease;
+}
+
+i.fa-user-o:before,
+i.fa-star-o:before {
+	margin-left: 1em;
+}
+
+/*	Рейтинг */
+.bg_counter_rating {
+	position: relative;
+	padding:0px; 
+	margin:0px;
+}
+#bg_counter_rate_box {
+	box-sizing:border-box; 
+	padding:0px; 
+	margin:0px;
+}
+#bg_counter_rate_box * {
+	box-sizing:border-box; 
+	padding:0px; margin:0px;
+}
+#bg_counter_rate_box li {
+	float:left; 
+	width:20px; 
+	height:20px;  
+	margin-right:3px; 
+	list-style:none; 
+	cursor:defult; 
+	background-image:url(stars.png); 
+	background-size:20px auto; 
+	background-position:0px 20px;
+}
+#bg_counter_rate_box li::before {
+    display: none;
+}
+#bg_counter_popup_help {
+	position: absolute;
+	padding: 2px 10px; 
+	margin: 0px;
+	left: 0px;
+	bottom: 24px;
+	min-width: 115px;
+	z-index: 100;
+	font-size: 16px;
+	background-color: rgba(250, 248, 241, 0.9);
+	color: #8A5536;
+	display: none;
+	font-family: Arial;
+	text-align: center;
+	border: 1px solid #A6801E;
+	border-radius: 3px; 
+	box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
