@@ -7,6 +7,7 @@
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
+	GitHub Plugin URI: https://github.com/VBog/Bg-Az-Counter-GitHub/
 */
 
 /*  Copyright 2019  Vadim Bogaiskov  (email: vadim.bogaiskov@gmail.com)
