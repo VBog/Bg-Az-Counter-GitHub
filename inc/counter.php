@@ -51,7 +51,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 
 	$response = json_decode($json, false);
 	if ($response->success == true){
-		$the_key='getPopularPosts_key';
+		$the_key='getPopularPosts_key_'.$limit.'_'.$offset.'_'.$number;
 		if(false===($quote=get_transient($the_key))) {
 			if ($number) $quote = '<ol class="bg-az-top-posts">'. PHP_EOL;
 			else $quote = '<ul class="bg-az-top-posts">'. PHP_EOL;

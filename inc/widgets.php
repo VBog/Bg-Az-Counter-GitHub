@@ -88,6 +88,7 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 	public function widget( $args, $instance ) {
 		$title = apply_filters( 'widget_title', $instance['title'] ); // к заголовку применяем фильтр (необязательно)
 		$subtitle1 = $instance['subtitle1'];
+		$unit1 = $instance['unit1'];
 		$subtitle2 = $instance['subtitle2'];
 		$subtitle3 = $instance['subtitle3'];
  
@@ -100,7 +101,7 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 	<div class="widget-item">
 		<div class="widget-inner">
 			<span class="bg-az-counter">
-				<p><?php echo $subtitle1; ?>: <span class="bg-az-counter-now"></span></p>
+				<p><?php echo $subtitle1; ?>: <span class="bg-az-counter-now"></span> <?php echo $unit1; ?></p>
 				<p><?php echo $subtitle2; ?>: <span class="bg-az-counter-views"></span></p>
 				<p><?php echo $subtitle3; ?>: <span class="bg-az-counter-posts"><?php echo wp_count_posts()->publish; ?></span></p>
 
@@ -124,6 +125,7 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 		<p>
 			<label for="<?php echo $this->get_field_id( 'subtitle1' ); ?>">Сейчас на сайте:</label> 
 			<input id="<?php echo $this->get_field_id( 'subtitle1' ); ?>" name="<?php echo $this->get_field_name( 'subtitle1' ); ?>" type="text" value="<?php echo ($subtitle1) ? esc_attr( $subtitle1 ) : 'Сейчас на сайте'; ?>" />
+			<input id="<?php echo $this->get_field_id( 'unit1' ); ?>" name="<?php echo $this->get_field_name( 'unit1' ); ?>" type="text" value="<?php echo ($unit1) ? esc_attr( $unit1 ) : 'чел.'; ?>" size="10" />
 		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'subtitle2' ); ?>">Всего просмотров:</label> 
@@ -141,6 +143,7 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 		$instance = array();
 		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
 		$instance['subtitle1'] = ( ! empty( $new_instance['subtitle1'] ) ) ? strip_tags( $new_instance['subtitle1'] ) : 'Сейчас на сайте';
+		$instance['unit1'] = ( ! empty( $new_instance['unit1'] ) ) ? strip_tags( $new_instance['unit1'] ) : 'чел.';
 		$instance['subtitle2'] = ( ! empty( $new_instance['subtitle2'] ) ) ? strip_tags( $new_instance['subtitle2'] ) : 'Всего просмотров';
 		$instance['subtitle3'] = ( ! empty( $new_instance['subtitle3'] ) ) ? strip_tags( $new_instance['subtitle3'] ) : 'Всего записей';
 		return $instance;
