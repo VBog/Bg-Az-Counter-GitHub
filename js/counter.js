@@ -1,5 +1,7 @@
+var bg_counter_elements = 0;
+
 jQuery( document ).ready(function() {
-	
+
 	if (bg_counter.ID) {
 		SendOnce(bg_counter.type, bg_counter.ID);
 		var request = bg_counter.websocket+bg_counter.project+"/"+bg_counter.type+"/"+bg_counter.ID;
@@ -27,6 +29,8 @@ jQuery( document ).ready(function() {
 			};
 		}
 	} else GetAllCounters();
+	
+	bg_counter_elements_reloaded_on_scroll();
 
 /*********************************************************************************
 	Просомтр счетчиков читающих в реальном времени.
@@ -186,6 +190,7 @@ function GetAllCounters() {
 	
 	jQuery('span.bg-az-counter').each (function () {
 		var el = jQuery(this);
+		bg_counter_elements = el.length;
 		var type = el.attr('data-type');
 		var id = el.attr('data-ID');
 		var project = el.attr('data-project');
@@ -271,4 +276,23 @@ function bg_counter_number_format (num) {
 		num = addDelimiter(num);
 	}
 	return num;
+}
+
+/*********************************************************************************
+	Обновляет счетчики после прокрутки страницы, 
+	если добавлены элементы.
+
+**********************************************************************************/
+function bg_counter_elements_reloaded_on_scroll() {
+	jQuery(window).on('scroll', function() {
+		var elem  = jQuery('span.bg-az-counter');
+
+		if( typeof elem == 'undefined' ) {
+			return;
+		}
+		if (elem.length > bg_counter_elements) {
+			GetAllCounters();
+//			getAllRates();
+		}
+	});
 }

@@ -2,10 +2,13 @@ var start_rate_index, rating_voted;
 var options={};
 options.expires=60*60*24;					// Кука на сутки
 options.path=window.location.pathname; 		// Текущий путь
+var bg_counter_ratings = 0;
 
 jQuery( document ).ready(function() {
 	
-		getAllRates();
+	
+//		getAllRates();
+		bg_counter_ratings_reloaded_on_scroll();
 		if (!bg_counter.ID) return;		// У объекта нет ID
 		if (jQuery("div").is(".bg_counter_rating") == false) return;	// На странице нет счетчика
 
@@ -129,6 +132,7 @@ function getAllRates() {
 	
 	jQuery('span.bg-az-counter').each (function () {
 		var el = jQuery(this);
+		bg_counter_ratings = el.length;
 		var type = el.attr('data-type');
 		var id = el.attr('data-ID');
 		var project = el.attr('data-project');
@@ -221,4 +225,21 @@ function sendRate(type, id, number) {
 	}
 	xhr.send('{"rating": '+number+'}');
 
+}
+/*********************************************************************************
+	Обновляет рейтинги после прокрутки страницы, 
+	если добавлены элементы.
+
+**********************************************************************************/
+function bg_counter_ratings_reloaded_on_scroll() {
+	jQuery(window).on('scroll', function() {
+		var elem  = jQuery('span.bg-az-counter');
+
+		if( typeof elem == 'undefined' ) {
+			return;
+		}
+		if (elem.length > bg_counter_ratings) {
+			getAllRates();
+		}
+	});
 }
