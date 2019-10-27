@@ -3,7 +3,7 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.6
+    Version: 2.6.1
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.6');
+define('BG_COUNTER_VERSION', '2.6.1');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');
@@ -124,7 +124,7 @@ function bg_counter_enqueue_frontend_scripts () {
 			'votes2' => 'голоcа', 
 			'vote1' => 'голос',
 			'voted' => 'Вы уже проголосовали',
-			'price' => array("тяжко", "слабо", "сносно", "достойно", "чудесно"),
+			'price' => array("худо", "слабо", "сносно", "достойно", "чудесно"),
 			'debug' => ((int) $option['debug'])?true:false		// Выводить или нет инфу в консоль
 		)
 	);
