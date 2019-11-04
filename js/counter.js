@@ -9,7 +9,8 @@ jQuery( document ).ready(function() {
 	// для переподключения сокета при разрыве соединения. 
 	// Вместо: 	var socket = new WebSocket(request);
 	// используем вызов:
-		var socket = new ReconnectingWebSocket(request);
+//		var socket = new ReconnectingWebSocket(request);
+		var socket = new ReconnectingWebSocket(request, null, { timeoutInterval: 10000 });
 		socket.onopen = function() {
 			if (bg_counter.debug) console.log(" Соединение установлено: "+request);
 			GetAllCounters();
@@ -70,7 +71,8 @@ jQuery( document ).ready(function() {
 		var json = JSON.stringify(data);
 		var request = bg_counter.updatesocket+(bg_counter.updatetime?('?time='+bg_counter.updatetime):'');
 		// Создаем сокет
-		var updatesocket = new ReconnectingWebSocket(request);
+//		var updatesocket = new ReconnectingWebSocket(request);
+		var updatesocket = new ReconnectingWebSocket(request, null, { timeoutInterval: 10000 });
 		// Отправляем данные, как только сокет будет подключен
 		updatesocket.onopen = function() {
 			if (bg_counter.debug) {
@@ -190,7 +192,7 @@ function GetAllCounters() {
 	
 	jQuery('span.bg-az-counter').each (function () {
 		var el = jQuery(this);
-		bg_counter_elements = el.length;
+//		bg_counter_elements = el.length;
 		var type = el.attr('data-type');
 		var id = el.attr('data-ID');
 		var project = el.attr('data-project');
@@ -291,6 +293,7 @@ function bg_counter_elements_reloaded_on_scroll() {
 			return;
 		}
 		if (elem.length > bg_counter_elements) {
+			bg_counter_elements = elem.length;
 			GetAllCounters();
 //			getAllRates();
 		}

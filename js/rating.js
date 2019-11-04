@@ -132,7 +132,7 @@ function getAllRates() {
 	
 	jQuery('span.bg-az-counter').each (function () {
 		var el = jQuery(this);
-		bg_counter_ratings = el.length;
+//		bg_counter_ratings = el.length;
 		var type = el.attr('data-type');
 		var id = el.attr('data-ID');
 		var project = el.attr('data-project');
@@ -239,6 +239,7 @@ function bg_counter_ratings_reloaded_on_scroll() {
 			return;
 		}
 		if (elem.length > bg_counter_ratings) {
+			bg_counter_ratings = elem.length;
 			getAllRates();
 		}
 	});
