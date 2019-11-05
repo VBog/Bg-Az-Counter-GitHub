@@ -6,43 +6,46 @@ var bg_counter_ratings = 0;
 
 jQuery( document ).ready(function() {
 	
+	getAllRates();
+//	Обновлять рейтинги после прокрутки страницы, если добавлены элементы.
+	jQuery(window).on('scroll', function() {
+		getAllRates();
+	});
 	
-//		getAllRates();
-		bg_counter_ratings_reloaded_on_scroll();
-		if (!bg_counter.ID) return;		// У объекта нет ID
-		if (jQuery("div").is(".bg_counter_rating") == false) return;	// На странице нет счетчика
+	if (!bg_counter.ID) return;		// У объекта нет ID
+	if (jQuery("div").is(".bg_counter_rating") == false) return;	// На странице нет счетчика
 
-		start_rate_index =  parseFloat(jQuery( "#bg_counter_score" ).html());
-		rating_voted = (jQuery( "#bg_counter_score" ).attr("data-voted")=='true')?true:false;
-		iniRatingState(start_rate_index, rating_voted);
+	start_rate_index =  parseFloat(jQuery( "#bg_counter_score" ).html());
+	rating_voted = (jQuery( "#bg_counter_score" ).attr("data-voted")=='true')?true:false;
+	iniRatingState(start_rate_index, rating_voted);
 
-		getRate(bg_counter.type, bg_counter.ID);
+	getRate(bg_counter.type, bg_counter.ID);
 
-		jQuery( "#bg_counter_rate_box li" ).mouseover(function() {
-			if(!rating_voted){
-				var index = jQuery( this ).index();
-				iniRatingState(index+1, rating_voted);
-				jQuery('#bg_counter_popup_help').text(bg_counter.price[index]);
-			} else {
-				jQuery('#bg_counter_popup_help').text(bg_counter.voted);
-			}
-			jQuery('#bg_counter_popup_help').show();
-		});
+	jQuery( "#bg_counter_rate_box li" ).mouseover(function() {
+		if(!rating_voted){
+			var index = jQuery( this ).index();
+			iniRatingState(index+1, rating_voted);
+			jQuery('#bg_counter_popup_help').text(bg_counter.price[index]);
+		} else {
+			jQuery('#bg_counter_popup_help').text(bg_counter.voted);
+		}
+		jQuery('#bg_counter_popup_help').show();
+	});
 
-		jQuery( "#bg_counter_rate_box" ).mouseout(function() {
-			if(!rating_voted){
-				iniRatingState(start_rate_index, rating_voted);	
-			}
-			jQuery('#bg_counter_popup_help').hide();
-		});
-		jQuery( "#bg_counter_rate_box li" ).click(function() {
-			if(!rating_voted){
-				rating_voted = true;
-				jQuery( "#bg_counter_rate_box li" ).css('cursor', 'default');
-				var sindex = jQuery( this ).index()+1;
-				sendRate(bg_counter.type, bg_counter.ID, sindex);
-			}
-		});
+	jQuery( "#bg_counter_rate_box" ).mouseout(function() {
+		if(!rating_voted){
+			iniRatingState(start_rate_index, rating_voted);	
+		}
+		jQuery('#bg_counter_popup_help').hide();
+	});
+	jQuery( "#bg_counter_rate_box li" ).click(function() {
+		if(!rating_voted){
+			rating_voted = true;
+			jQuery( "#bg_counter_rate_box li" ).css('cursor', 'default');
+			var sindex = jQuery( this ).index()+1;
+			sendRate(bg_counter.type, bg_counter.ID, sindex);
+		}
+	});
 });
 function iniRatingState(sindex, voted){
 	if(!voted) jQuery( "#bg_counter_rate_box li" ).css('cursor', 'pointer');	
@@ -130,41 +133,48 @@ function getRate(type, id) {
 
 function getAllRates() {
 	
-	jQuery('span.bg-az-counter').each (function () {
-		var el = jQuery(this);
-//		bg_counter_ratings = el.length;
-		var type = el.attr('data-type');
-		var id = el.attr('data-ID');
-		var project = el.attr('data-project');
-		if (project) project = '/project/'+project;
-		else project = bg_counter.project;
-		
-		if (!type || !id) return;
-		var request = bg_counter.scoreurl+bg_counter.project+"/"+type+"/"+id;
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", request, true);
-		if (bg_counter.debug) console.log('GET REQUEST: '+request);
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4 && xhr.status == 200) {
-				if (xhr.responseText) {
-					var response =  JSON.parse(xhr.responseText);
-					if (response.success) {
-						// Вывод данных на экран
-						if (bg_counter.debug) console.log(JSON.stringify(response.data));
-						el.find('span.bg-az-counter-score').text(parseFloat(response.data.score).toFixed(1));
+	var elem  = jQuery('span.bg-az-counter');
+
+	if( typeof elem == 'undefined' ) {
+		return;
+	}
+	if (elem.length > bg_counter_ratings) {
+		bg_counter_ratings = elem.length;
+		jQuery('span.bg-az-counter').each (function () {
+			var el = jQuery(this);
+	//		bg_counter_ratings = el.length;
+			var type = el.attr('data-type');
+			var id = el.attr('data-ID');
+			var project = el.attr('data-project');
+			if (project) project = '/project/'+project;
+			else project = bg_counter.project;
+			
+			if (!type || !id) return;
+			var request = bg_counter.scoreurl+bg_counter.project+"/"+type+"/"+id;
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", request, true);
+			if (bg_counter.debug) console.log('GET REQUEST: '+request);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4 && xhr.status == 200) {
+					if (xhr.responseText) {
+						var response =  JSON.parse(xhr.responseText);
+						if (response.success) {
+							// Вывод данных на экран
+							if (bg_counter.debug) console.log(JSON.stringify(response.data));
+							el.find('span.bg-az-counter-score').text(parseFloat(response.data.score).toFixed(1));
+						} else {
+							if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR: '+response.error);
+							el.find('span.bg-az-counter-score').text('0');
+						}
 					} else {
-						if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR: '+response.error);
-						el.find('span.bg-az-counter-score').text('0');
+						if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
+						el.find('span.bg-az-counter-score').text(' - ');
 					}
-				} else {
-					if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
-					el.find('span.bg-az-counter-score').text(' - ');
 				}
 			}
-		}
-		xhr.send();
-	});
-
+			xhr.send();
+		});
+	}
 }
 
 
@@ -225,22 +235,4 @@ function sendRate(type, id, number) {
 	}
 	xhr.send('{"rating": '+number+'}');
 
-}
-/*********************************************************************************
-	Обновляет рейтинги после прокрутки страницы, 
-	если добавлены элементы.
-
-**********************************************************************************/
-function bg_counter_ratings_reloaded_on_scroll() {
-	jQuery(window).on('scroll', function() {
-		var elem  = jQuery('span.bg-az-counter');
-
-		if( typeof elem == 'undefined' ) {
-			return;
-		}
-		if (elem.length > bg_counter_ratings) {
-			bg_counter_ratings = elem.length;
-			getAllRates();
-		}
-	});
 }
