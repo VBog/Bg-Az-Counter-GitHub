@@ -13,7 +13,11 @@ jQuery( document ).ready(function() {
 		var socket = new ReconnectingWebSocket(request, null, { timeoutInterval: 10000 });
 		socket.onopen = function() {
 			if (bg_counter.debug) console.log(" Соединение установлено: "+request);
-			GetAllCounters();
+			//	Обновляет счетчики каждые 3 сек, если добавлены элементы.
+			let timerAllCountersId = setTimeout(function tickAllCounters() {
+				GetAllCounters();
+				timerAllCountersId = setTimeout(tickAllCounters, bg_counter.updatetime?bg_counter.updatetime:3000); 
+			}, bg_counter.updatetime?bg_counter.updatetime:3000);
 		};
 		// Обработка ошибок
 		if (bg_counter.debug) {
@@ -29,12 +33,17 @@ jQuery( document ).ready(function() {
 				console.log('Код: ' + event.code + ' причина: ' + event.reason);
 			};
 		}
-	} else GetAllCounters();
-	
-	//	Обновляет счетчики после прокрутки страницы, если добавлены элементы.
-	jQuery(window).on('scroll', function() {
-		GetAllCounters();
-	});
+	} else {
+		//	Обновляет счетчики каждые 3 сек, если добавлены элементы.
+		let timerAllCountersId = setTimeout(function tickAllCounters() {
+			GetAllCounters();
+			timerAllCountersId = setTimeout(tickAllCounters, bg_counter.updatetime?bg_counter.updatetime:3000); 
+		}, bg_counter.updatetime?bg_counter.updatetime:3000);
+	}
+//	Обновляет счетчики после прокрутки страницы, если добавлены элементы.
+//	jQuery(window).on('scroll', function() {
+//		GetAllCounters();
+//	});
 
 /*********************************************************************************
 	Просомтр счетчиков читающих в реальном времени.
@@ -194,57 +203,64 @@ GET /counters/project/test/author/1/book/3
 function GetAllCounters() {
 	
 	var elem  = jQuery('span.bg-az-counter');
-
 	if( typeof elem == 'undefined' ) {
 		return;
 	}
+	var elem_num  = 0;
 	if (elem.length > bg_counter_elements) {
-		bg_counter_elements = elem.length;
-		jQuery('span.bg-az-counter').each (function () {
-			var el = jQuery(this);
-	//		bg_counter_elements = el.length;
-			var type = el.attr('data-type');
-			var id = el.attr('data-ID');
-			var project = el.attr('data-project');
-			if (project == "") request = bg_counter.counterurl;
-			else {
-				if (project) project = '/project/'+project;
-				else project = bg_counter.project;
-				
-				if (!type || !id) var request = bg_counter.counterurl+project;
-				else var request = bg_counter.counterurl+project+"/"+type+"/"+id;
-				
-			}
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", request, true);
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState == 4 && xhr.status == 200) {
-					if (xhr.responseText) {
-						var response =  JSON.parse(xhr.responseText);
-						if (response.success) {
-							if (bg_counter.debug) console.log('GET REQUEST: '+request);
-							if (bg_counter.debug) console.log(JSON.stringify(response.data)); 
-							el.find('span.bg-az-counter-views').text(bg_counter_number_format(response.data.total));
-							el.find('span.bg-az-counter-now').text(addDelimiter(response.data.now));
+		elem.each (function () {
+			if (elem_num >= bg_counter_elements) {
+				var el = jQuery(this);
+				var type = el.attr('data-type');
+				var id = el.attr('data-ID');
+				var project = el.attr('data-project');
+				if (project == "") request = bg_counter.counterurl;
+				else {
+					if (project) project = '/project/'+project;
+					else project = bg_counter.project;
+					
+					if (!type || !id) var request = bg_counter.counterurl+project;
+					else var request = bg_counter.counterurl+project+"/"+type+"/"+id;
+					
+				}
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", request, true);
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState != 4) return;
+					if (xhr.status == 200) {
+						if (xhr.responseText) {
+							var response =  JSON.parse(xhr.responseText);
+							if (response.success) {
+								if (bg_counter.debug) console.log('GET REQUEST: '+request);
+								if (bg_counter.debug) console.log(JSON.stringify(response.data)); 
+								el.find('span.bg-az-counter-views').text(bg_counter_number_format(response.data.total));
+								el.find('span.bg-az-counter-now').text(addDelimiter(response.data.now));
+							} else {
+								if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR '+xhr.status+': '+response.error);
+								el.find('span.bg-az-counter-views').text('0');
+								el.find('span.bg-az-counter-now').text('0');
+							}
 						} else {
-							if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR '+xhr.status+': '+response.error);
-							el.find('span.bg-az-counter-views').text('0');
-							el.find('span.bg-az-counter-now').text('0');
+							if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
+							el.find('span.bg-az-counter-views').text(' - ');
+							el.find('span.bg-az-counter-now').text(' - ');
 						}
 					} else {
-						if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
-						el.find('span.bg-az-counter-views').text(' - ');
-						el.find('span.bg-az-counter-now').text(' - ');
+						if (bg_counter.debug) console.warn('ERROR '+xhr.status+': '+xhr.statusText);
+						el.find('span.bg-az-counter-views').text('-');
+						el.find('span.bg-az-counter-now').text('-');
 					}
 				}
-			}
-			xhr.onerror = function(err) {
-				console.warn(err.type +" "+ err.target.status + ". Check if the server is running!");  
-				el.find('span.bg-az-counter-views').text(' - ');
-				el.find('span.bg-az-counter-now').text(' - ');
-			}
+				xhr.onerror = function(err) {
+					console.warn(err.type +" "+ err.target.status + ". Check if the server is running!");  
+					el.find('span.bg-az-counter-views').text(' - ');
+					el.find('span.bg-az-counter-now').text(' - ');
+				}
 			xhr.send();
+			}
+			elem_num++;
 		});
+		bg_counter_elements = elem.length;
 	}
 }
 /*********************************************************************************

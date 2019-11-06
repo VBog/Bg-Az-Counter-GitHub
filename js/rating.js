@@ -6,11 +6,16 @@ var bg_counter_ratings = 0;
 
 jQuery( document ).ready(function() {
 	
-	getAllRates();
-//	Обновлять рейтинги после прокрутки страницы, если добавлены элементы.
-	jQuery(window).on('scroll', function() {
+//	Обновлять рейтинги каждые 3 сек, если добавлены элементы.
+	let timerAllRatesId = setTimeout(function tickAllRates() {
 		getAllRates();
-	});
+		timerAllRatesId = setTimeout(tickAllRates, bg_counter.updatetime?bg_counter.updatetime:3000); 
+	}, bg_counter.updatetime?bg_counter.updatetime:3000);
+	
+//	Обновлять рейтинги после прокрутки страницы, если добавлены элементы.
+//	jQuery(window).on('scroll', function() {
+//		getAllRates();
+//	});
 	
 	if (!bg_counter.ID) return;		// У объекта нет ID
 	if (jQuery("div").is(".bg_counter_rating") == false) return;	// На странице нет счетчика
@@ -142,7 +147,6 @@ function getAllRates() {
 		bg_counter_ratings = elem.length;
 		jQuery('span.bg-az-counter').each (function () {
 			var el = jQuery(this);
-	//		bg_counter_ratings = el.length;
 			var type = el.attr('data-type');
 			var id = el.attr('data-ID');
 			var project = el.attr('data-project');
@@ -155,7 +159,8 @@ function getAllRates() {
 			xhr.open("GET", request, true);
 			if (bg_counter.debug) console.log('GET REQUEST: '+request);
 			xhr.onreadystatechange = function() {
-				if (xhr.readyState == 4 && xhr.status == 200) {
+				if (xhr.readyState != 4) return;
+				if (xhr.status == 200) {
 					if (xhr.responseText) {
 						var response =  JSON.parse(xhr.responseText);
 						if (response.success) {
@@ -170,6 +175,9 @@ function getAllRates() {
 						if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
 						el.find('span.bg-az-counter-score').text(' - ');
 					}
+				} else {
+					if (bg_counter.debug) console.warn('ERROR '+xhr.status+': '+xhr.statusText);
+					el.find('span.bg-az-counter-score').text('-');
 				}
 			}
 			xhr.send();
