@@ -1,21 +1,6 @@
 var start_rate_index, rating_voted;
-var options={};
-options.expires=60*60*24;					// Кука на сутки
-options.path=window.location.pathname; 		// Текущий путь
-var bg_counter_ratings = 0;
 
 jQuery( document ).ready(function() {
-	
-//	Обновлять рейтинги каждые 3 сек, если добавлены элементы.
-	let timerAllRatesId = setTimeout(function tickAllRates() {
-		getAllRates();
-		timerAllRatesId = setTimeout(tickAllRates, bg_counter.updatetime?bg_counter.updatetime:3000); 
-	}, bg_counter.updatetime?bg_counter.updatetime:3000);
-	
-//	Обновлять рейтинги после прокрутки страницы, если добавлены элементы.
-//	jQuery(window).on('scroll', function() {
-//		getAllRates();
-//	});
 	
 	if (!bg_counter.ID) return;		// У объекта нет ID
 	if (jQuery("div").is(".bg_counter_rating") == false) return;	// На странице нет счетчика
@@ -135,57 +120,6 @@ function getRate(type, id) {
 	xhr.send();
 
 }
-
-function getAllRates() {
-	
-	var elem  = jQuery('span.bg-az-counter');
-
-	if( typeof elem == 'undefined' ) {
-		return;
-	}
-	if (elem.length > bg_counter_ratings) {
-		bg_counter_ratings = elem.length;
-		jQuery('span.bg-az-counter').each (function () {
-			var el = jQuery(this);
-			var type = el.attr('data-type');
-			var id = el.attr('data-ID');
-			var project = el.attr('data-project');
-			if (project) project = '/project/'+project;
-			else project = bg_counter.project;
-			
-			if (!type || !id) return;
-			var request = bg_counter.scoreurl+bg_counter.project+"/"+type+"/"+id;
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", request, true);
-			if (bg_counter.debug) console.log('GET REQUEST: '+request);
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
-				if (xhr.status == 200) {
-					if (xhr.responseText) {
-						var response =  JSON.parse(xhr.responseText);
-						if (response.success) {
-							// Вывод данных на экран
-							if (bg_counter.debug) console.log(JSON.stringify(response.data));
-							el.find('span.bg-az-counter-score').text(parseFloat(response.data.score).toFixed(1));
-						} else {
-							if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR: '+response.error);
-							el.find('span.bg-az-counter-score').text('0');
-						}
-					} else {
-						if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
-						el.find('span.bg-az-counter-score').text(' - ');
-					}
-				} else {
-					if (bg_counter.debug) console.warn('ERROR '+xhr.status+': '+xhr.statusText);
-					el.find('span.bg-az-counter-score').text('-');
-				}
-			}
-			xhr.send();
-		});
-	}
-}
-
-
 /*********************************************************************************
 POST /rate/<path>
 

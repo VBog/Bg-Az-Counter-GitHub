@@ -4,7 +4,7 @@
 	
 *******************************************************************************************/
 // Начальные значения
-add_option('bg_counter_options', array('period'=>DAY_IN_SECONDS, 'update'=>3000, 'views'=>1, 'now'=>1, 'rate'=>1, 'title'=>'', 'author'=>'', 'debug'=>0, 'archive'=>0, 'pvc'=>0, 'wppp'=>0, 'wppm'=>0, 'bgar'=>0));
+add_option('bg_counter_options', array('period'=>DAY_IN_SECONDS, 'update'=>3000, 'maxreconnect'=>5, 'views'=>1, 'now'=>1, 'rate'=>1, 'title'=>'', 'author'=>'', 'debug'=>0, 'archive'=>0, 'pvc'=>0, 'wppp'=>0, 'wppm'=>0, 'bgar'=>0));
 add_option('bg_pvc_loaded', '');
 add_option('bg_wppp_loaded', '');
 add_option('bg_wppm_loaded', '');
@@ -17,6 +17,10 @@ if (!isset($val['period'])) {
 if (!isset($val['update'])) {
 	$val['update'] = 3000;
 	update_option( 'bg_counter_period', $val['update'] );
+}	
+if (!isset($val['maxreconnect'])) {
+	$val['maxreconnect'] = 5;
+	update_option( 'bg_counter_maxreconnect', $val['maxreconnect'] );
 }	
 if (!isset($val['views'])) {
 	$val['views'] = 0;
@@ -193,6 +197,7 @@ function bg_counter_settings(){
 	// параметры: $id, $title, $callback, $page, $section, $args
 	add_settings_field('bg_counter_period', 'Периодичность обработки данных', 'fill_bg_counter_period', 'bg_counter_page', 'section_1' );
 	add_settings_field('bg_counter_update', 'Периодичность обновления счетчиков online-посетителей', 'fill_bg_counter_update', 'bg_counter_page', 'section_1' );
+	add_settings_field('bg_counter_maxreconnect', 'Максимальное количество повторов запросов', 'fill_bg_counter_maxreconnect', 'bg_counter_page', 'section_1' );
 	add_settings_field('bg_counter_views', 'Просмотров всего', 'fill_bg_counter_views', 'bg_counter_page', 'section_1' );
 	add_settings_field('bg_counter_now', 'Просматривают сейчас', 'fill_bg_counter_now', 'bg_counter_page', 'section_1' );
 	add_settings_field('bg_counter_rate', 'Оценка пользователями', 'fill_bg_counter_rate', 'bg_counter_page', 'section_1' );
@@ -230,6 +235,15 @@ function fill_bg_counter_update(){
 	$val = $val['update']; 
 	?>
 	<input type="number" name="bg_counter_options[update]" value="<?php echo esc_attr( $val ) ?>" step="100" min="500" /> мсек.
+	<?php
+}
+
+## Заполняем опцию 1c
+function fill_bg_counter_maxreconnect(){
+	$val = get_option('bg_counter_options');
+	$val = $val['maxreconnect']; 
+	?>
+	<input type="number" name="bg_counter_options[maxreconnect]" value="<?php echo esc_attr( $val ) ?>" step="1" min="1" />
 	<?php
 }
 

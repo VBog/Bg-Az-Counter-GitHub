@@ -3,7 +3,7 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.6.4
+    Version: 2.7
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.6.4');
+define('BG_COUNTER_VERSION', '2.7');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');
@@ -47,6 +47,8 @@ define('BG_COUNTER_STAT_RATING','https://stat.azbyka.ru/rating');
 define('BG_COUNTER_STAT_RATE','https://stat.azbyka.ru/rate');
 define('BG_COUNTER_STAT_SCORE','https://stat.azbyka.ru/item-score');
 define('BG_COUNTER_STAT_SCORELIST','https://stat.azbyka.ru/scores-list');
+
+define('BG_COUNTER_STAT_BATCH','https://stat.azbyka.ru/batch-query');
 
 define('BG_COUNTER_STAT_SET','https://stat.azbyka.ru/set-counter');
 define('BG_COUNTER_STAT_SET_RATINGS','https://stat.azbyka.ru/set-rating');
@@ -114,9 +116,11 @@ function bg_counter_enqueue_frontend_scripts () {
 			'counterurl' => BG_COUNTER_STAT_COUNTERS, 			// Всегда 'https://stat.azbyka.ru/counters'
 			'rateurl' => BG_COUNTER_STAT_RATE, 					// Всегда 'https://stat.azbyka.ru/rate'
 			'scoreurl' => BG_COUNTER_STAT_SCORE, 				// Всегда 'https://stat.azbyka.ru/item-score'
+			'batch' => BG_COUNTER_STAT_BATCH, 					// Всегда 'https://stat.azbyka.ru/batch-query'
 			'websocket' => BG_COUNTER_REALTIME_VIEW, 			// Всегда 'wss://stat.azbyka.ru/realtime-view'
 			'updatesocket' => BG_COUNTER_REALTIME_UPDATES, 		// Всегда 'wss://stat.azbyka.ru/updates'
 			'updatetime' => (int) $option['update'], 			// Время обновление счетчиков онлайн-посетителей
+			'maxreconnect' => (int) $option['maxreconnect'], 	// Макс. количество повторов подключений
 			'project' => $project,								// Имя текущего проекта, например, '/propovedi'
 			'type' => $type,									// Тип объекта 'post', 'category', 'tag', 'index' или пусто
 			'ID' => $theID,										// ID объекта 

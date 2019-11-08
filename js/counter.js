@@ -1,6 +1,13 @@
 var bg_counter_elements = 0;
+var notconnected = 0;
 
 jQuery( document ).ready(function() {
+
+/*********************************************************************************
+
+	Если задан ID, то увеличиваем счетчик посетителей и включаем сокет присутствия
+	
+**********************************************************************************/
 
 	if (bg_counter.ID) {
 		SendOnce(bg_counter.type, bg_counter.ID);
@@ -9,15 +16,9 @@ jQuery( document ).ready(function() {
 	// для переподключения сокета при разрыве соединения. 
 	// Вместо: 	var socket = new WebSocket(request);
 	// используем вызов:
-//		var socket = new ReconnectingWebSocket(request);
-		var socket = new ReconnectingWebSocket(request, null, { timeoutInterval: 10000 });
+		var socket = new ReconnectingWebSocket(request, null, { debug: bg_counter.debug, timeoutInterval: 10000, reconnectInterval: 5000, maxReconnectAttempts: 20 });
 		socket.onopen = function() {
 			if (bg_counter.debug) console.log(" Соединение установлено: "+request);
-			//	Обновляет счетчики каждые 3 сек, если добавлены элементы.
-			let timerAllCountersId = setTimeout(function tickAllCounters() {
-				GetAllCounters();
-				timerAllCountersId = setTimeout(tickAllCounters, bg_counter.updatetime?bg_counter.updatetime:3000); 
-			}, bg_counter.updatetime?bg_counter.updatetime:3000);
 		};
 		// Обработка ошибок
 		if (bg_counter.debug) {
@@ -33,17 +34,7 @@ jQuery( document ).ready(function() {
 				console.log('Код: ' + event.code + ' причина: ' + event.reason);
 			};
 		}
-	} else {
-		//	Обновляет счетчики каждые 3 сек, если добавлены элементы.
-		let timerAllCountersId = setTimeout(function tickAllCounters() {
-			GetAllCounters();
-			timerAllCountersId = setTimeout(tickAllCounters, bg_counter.updatetime?bg_counter.updatetime:3000); 
-		}, bg_counter.updatetime?bg_counter.updatetime:3000);
 	}
-//	Обновляет счетчики после прокрутки страницы, если добавлены элементы.
-//	jQuery(window).on('scroll', function() {
-//		GetAllCounters();
-//	});
 
 /*********************************************************************************
 	Просомтр счетчиков читающих в реальном времени.
@@ -61,77 +52,63 @@ jQuery( document ).ready(function() {
 	}
 	Поменять список отслеживаемых счетчиков можно повторно отправив массив и путей.
 **********************************************************************************/
-	// Массив из путей счётчиков
-	var data = new Array();
-	var i = 0;
-	jQuery('span.bg-az-counter').each (function () {
-		var el = jQuery(this);
-		var project = el.attr('data-project');
-		if (project == "") path = "/";
-		else {
-			if (project == undefined) project = bg_counter.project;
-			else project = '/project/'+project;
+	var request = bg_counter.updatesocket+(bg_counter.updatetime?('?time='+bg_counter.updatetime):'');
+	// Создаем сокет
+	var updatesocket = new ReconnectingWebSocket(request, null, { debug: bg_counter.debug, timeoutInterval: 10000, reconnectInterval: 5000, maxReconnectAttempts: 20 });
+	// Слушаем сокет
+	updatesocket.onmessage   = function(e) {
+		if (bg_counter.debug) console.log(" Пришло сообщение: "+e.data);
+		var online = JSON.parse(e.data);
+		jQuery('span.bg-az-counter').each (function () {
+			var el = jQuery(this);
 			var type = el.attr('data-type');
 			var id = el.attr('data-ID');
-			if (!type || !id) var path = project;
-			else var path = project+"/"+type+"/"+id;
-		}
-		data[i] = path;
-		i++;
-	});
-	if (data.length) {
-		var json = JSON.stringify(data);
-		var request = bg_counter.updatesocket+(bg_counter.updatetime?('?time='+bg_counter.updatetime):'');
-		// Создаем сокет
-//		var updatesocket = new ReconnectingWebSocket(request);
-		var updatesocket = new ReconnectingWebSocket(request, null, { timeoutInterval: 10000 });
-		// Отправляем данные, как только сокет будет подключен
-		updatesocket.onopen = function() {
-			if (bg_counter.debug) {
-				console.log(" Соединение установлено: "+request);
-				console.log(" Path ("+i+"): "+json);
+			var project = el.attr('data-project');
+			if (project == "") path = "/";
+			else {
+				if (project == undefined) project = bg_counter.project;
+				else project = '/project/'+project;
+				if (!type || !id) var path = project;
+				else var path = project+"/"+type+"/"+id;
 			}
-			updatesocket.send(json);
-		};
-		// Слушаем сокет
-		updatesocket.onmessage   = function(e) {
-			if (bg_counter.debug) console.log(" Пришло сообщение: "+e.data);
-			var online = JSON.parse(e.data);
-			jQuery('span.bg-az-counter').each (function () {
-				var el = jQuery(this);
-				var type = el.attr('data-type');
-				var id = el.attr('data-ID');
-				var project = el.attr('data-project');
-				if (project == "") path = "/";
-				else {
-					if (project == undefined) project = bg_counter.project;
-					else project = '/project/'+project;
-					if (!type || !id) var path = project;
-					else var path = project+"/"+type+"/"+id;
+			for (var key in online) {
+				if(path == key) {
+					el.find('span.bg-az-counter-now').text(addDelimiter(online[key]));
 				}
-				for (var key in online) {
-					if(path == key) {
-						el.find('span.bg-az-counter-now').text(addDelimiter(online[key]));
-					}
-				}
-			});
-		};
-		// Обработка ошибок
-		if (bg_counter.debug) {
-			updatesocket.onerror = function(error) {
-				console.log("Ошибка " + error.message);
-			};
-			updatesocket.onclose = function(event) {
-				if (event.wasClean) {
-					console.log('Соединение закрыто чисто: '+request);
-				} else {
-					console.log('Обрыв соединения: '+request); 
-				}
-				console.log('Код: ' + event.code + ' причина: ' + event.reason);
-			};
+			}
+		});
+	};
+	// Обработка ошибок
+	updatesocket.onerror = function(error) {
+		if (bg_counter.debug) console.log("Ошибка " + error.message);
+	};
+	updatesocket.onclose = function(event) {
+		if (event.wasClean) {
+			if (bg_counter.debug) console.log('Соединение закрыто чисто: '+request);
+		} else {
+			if (bg_counter.debug) console.log('Обрыв соединения: '+request); 
 		}
-	}
+		if (bg_counter.debug) console.log('Код: ' + event.code + ' причина: ' + event.reason);
+	};
+
+	
+/*********************************************************************************
+
+	Каждые 3 сек. проверяем не добавлены ли счетчики, 
+	если добавлены, то запрашиваем данные.
+	
+**********************************************************************************/
+	
+		if (fullBatchQuery(updatesocket)) {
+			let timerAllCountersId = setTimeout(function tickAllCounters() {
+				if (fullBatchQuery(updatesocket)) {
+					timerAllCountersId = setTimeout(tickAllCounters, bg_counter.updatetime?bg_counter.updatetime:3000); 
+				}
+			}, bg_counter.updatetime?bg_counter.updatetime:3000);
+		}
+
 });
+
 /*********************************************************************************
 	POST /counters/<path>
 
@@ -162,107 +139,31 @@ function SendOnce(type, id) {
 	xhr.open("POST", request, true);
 	if (bg_counter.debug) console.log('POST REQUEST: '+request);
 	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4 && xhr.status == 200) {
+		if (xhr.readyState != 4) return;
+		if (xhr.status == 200) {
 			if (xhr.responseText) {
 				var response =  JSON.parse(xhr.responseText);
 				if (response.success) {
 					// Здесь надо будет добавить вывод данных на экран
-					if (bg_counter.debug) console.log(JSON.stringify(response.data));
+					if (bg_counter.debug) {
+						console.log('POST REQUEST: '+request+' result:');
+						console.log(JSON.stringify(response.data));
+					}
 					setViewCount (type, id, bg_counter_number_format(response.data.value), addDelimiter(response.data.now+1));
 				} else {
-					if (bg_counter.debug) console.log('POST REQUEST: '+request+' ERROR: '+response.error);
+					if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR: '+response.error);
 				}
+			} else {
+				if (bg_counter.debug) console.warn('POST REQUEST: '+request+' Warning: responseText is empty!');
 			}
+		} else {
+			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
 		}
 	}
 	xhr.send();
 
 }
 
-/*********************************************************************************
-GET /counters/<path>
-
-Возвращает текущие значения счётчика - общий счётчик и количество
-просматривающих в данный момент.
-
-Пример запроса:
-
-GET /counters/project/test/author/1/book/3
-
-Пример ответа:
-
-{
-  "success":true,
-  "data":{
-    "now":3,
-    "total":34
-  }
-}
-Если счётчик не существует, возвращает 404.
-**********************************************************************************/
-function GetAllCounters() {
-	
-	var elem  = jQuery('span.bg-az-counter');
-	if( typeof elem == 'undefined' ) {
-		return;
-	}
-	var elem_num  = 0;
-	if (elem.length > bg_counter_elements) {
-		elem.each (function () {
-			if (elem_num >= bg_counter_elements) {
-				var el = jQuery(this);
-				var type = el.attr('data-type');
-				var id = el.attr('data-ID');
-				var project = el.attr('data-project');
-				if (project == "") request = bg_counter.counterurl;
-				else {
-					if (project) project = '/project/'+project;
-					else project = bg_counter.project;
-					
-					if (!type || !id) var request = bg_counter.counterurl+project;
-					else var request = bg_counter.counterurl+project+"/"+type+"/"+id;
-					
-				}
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", request, true);
-				xhr.onreadystatechange = function() {
-					if (xhr.readyState != 4) return;
-					if (xhr.status == 200) {
-						if (xhr.responseText) {
-							var response =  JSON.parse(xhr.responseText);
-							if (response.success) {
-								if (bg_counter.debug) console.log('GET REQUEST: '+request);
-								if (bg_counter.debug) console.log(JSON.stringify(response.data)); 
-								el.find('span.bg-az-counter-views').text(bg_counter_number_format(response.data.total));
-								el.find('span.bg-az-counter-now').text(addDelimiter(response.data.now));
-							} else {
-								if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR '+xhr.status+': '+response.error);
-								el.find('span.bg-az-counter-views').text('0');
-								el.find('span.bg-az-counter-now').text('0');
-							}
-						} else {
-							if (bg_counter.debug) console.warn('GET REQUEST: '+request+' Warning: responseText is empty!');
-							el.find('span.bg-az-counter-views').text(' - ');
-							el.find('span.bg-az-counter-now').text(' - ');
-						}
-					} else {
-						if (bg_counter.debug) console.warn('ERROR '+xhr.status+': '+xhr.statusText);
-						el.find('span.bg-az-counter-views').text('-');
-						el.find('span.bg-az-counter-now').text('-');
-					}
-				}
-				xhr.onerror = function(err) {
-					console.warn(err.type +" "+ err.target.status + ". Check if the server is running!");  
-					el.find('span.bg-az-counter-views').text(' - ');
-					el.find('span.bg-az-counter-now').text(' - ');
-				}
-			xhr.send();
-			}
-			elem_num++;
-		});
-		bg_counter_elements = elem.length;
-	}
-}
 /*********************************************************************************
 	Отображает значения счетчика на странице
 
@@ -290,6 +191,7 @@ function addDelimiter(nStr, dlm='\xa0') {
     }
     return x1 + x2;
 }
+// Сокращает запись числа до млрд., млн., тыс.
 function bg_counter_number_format (num) {
 	num = parseFloat (num);
 	if (num > 1000000000.0) {
@@ -307,3 +209,133 @@ function bg_counter_number_format (num) {
 	return num;
 }
 
+/*********************************************************************************
+POST /batch-query
+
+Возвращает счётчики просмотров, рейтинги и онлайн-счётчики для массива путей.
+
+Пример запроса:
+POST /batch-query
+
+Тело запроса:
+
+["/project:test", "/some:path"]
+Пример ответа:
+
+{
+  "/project:test": {
+    "viewCounter": 5,
+    "onlineCounter": 0,
+    "rating": null
+  },
+  "/some:path": {
+    "viewCounter": 4,
+    "onlineCounter": 2,
+    "rating": 3.8
+  }
+}
+**********************************************************************************/
+
+function fullBatchQuery(socket) {
+	
+	// Массив из путей счётчиков
+	var elem  = jQuery('span.bg-az-counter');
+	if( typeof elem == 'undefined' ) return false;					// Нет полей для вывода информации на странице
+	if (notconnected > bg_counter.maxreconnect) return false;		// Не более maxReConnect сбоев при запросе
+
+	if (elem.length > bg_counter_elements) {
+		var data_added = new Array();
+		var data = new Array();
+		var i = 0;
+		var elem_num = 0;
+		elem.each (function () {
+			var el = jQuery(this);
+			var project = el.attr('data-project');
+			if (project == "") path = "/";
+			else {
+				if (project == undefined) project = bg_counter.project;
+				else project = '/project/'+project;
+				var type = el.attr('data-type');
+				var id = el.attr('data-ID');
+				if (!type || !id) var path = project;
+				else var path = project+"/"+type+"/"+id;
+			}
+			if (elem_num >= bg_counter_elements) {
+				data_added[i] = path; //*************
+				i++;
+			}
+			data[elem_num] = path;
+			elem_num++;
+		});
+		bg_counter_elements = elem.length;
+		
+		if (data_added.length) {
+			var request = bg_counter.batch;
+			var json_added = JSON.stringify(data_added);
+			var json = JSON.stringify(data);
+			if (bg_counter.debug) {
+				console.log(" Запрос: "+request);
+				console.log(" Path ("+i+"): "+json);
+			}
+	
+			// Пакетный запрос
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", request, true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+				if (xhr.status == 200) {
+					if (xhr.responseText) {
+						var response =  JSON.parse(xhr.responseText);
+						if (bg_counter.debug) console.log('POST REQUEST: '+request+' result:');
+						if (bg_counter.debug) console.log(JSON.stringify(response)); 
+						jQuery('span.bg-az-counter').each (function () {
+							var el = jQuery(this);
+							var type = el.attr('data-type');
+							var id = el.attr('data-ID');
+							var project = el.attr('data-project');
+							if (project == "") path = "/";
+							else {
+								if (project == undefined) project = bg_counter.project.replace('/project/','/project:');
+								else project = '/project:'+project;
+								if (!type || !id) var path = project;
+								else var path = project+"/"+type+":"+id;
+							}
+							for (var key in response) {
+								if(path == key) {
+									if (response[key].viewCounter) 
+										el.find('span.bg-az-counter-views').text(bg_counter_number_format(response[key].viewCounter));
+									else
+										el.find('span.bg-az-counter-views').text(0);
+									el.find('span.bg-az-counter-now').text(addDelimiter(response[key].onlineCounter));
+									if (response[key].rating) 
+										el.find('span.bg-az-counter-score').text(parseFloat(response[key].rating.score).toFixed(1));
+									else 
+										el.find('span.bg-az-counter-score').text('-');
+								}
+							}
+						});
+					} else {
+						if (bg_counter.debug) console.warn('POST REQUEST: '+request+' Warning: responseText is empty!');
+					}
+				} else {
+					if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
+					notconnected++;
+				}
+			}
+			xhr.onerror = function(err) {
+				console.warn(err.type +" "+ err.target.status + ". Check if the server is running!");  
+			}
+			xhr.send(json_added); 
+
+			// Отправляем данные, как только сокет будет подключен
+			if (socket.readyState == WebSocket.OPEN) {
+				socket.send(json);
+			} else {
+				socket.onopen = function() {
+					socket.send(json);
+				}
+			}
+		}
+	}
+	return true;
+}
