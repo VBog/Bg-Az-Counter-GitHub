@@ -112,7 +112,6 @@ jQuery( document ).ready(function() {
 /*********************************************************************************
 	POST /counters/<path>
 
-
 	Увеличивает счётчик на единицу (и создаёт его, если он не существует).
 	Тело запроса пустое.
 
@@ -135,33 +134,22 @@ jQuery( document ).ready(function() {
 function SendOnce(type, id) {
 	
 	var request = bg_counter.counterurl+bg_counter.project+"/"+type+"/"+id;
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", request, true);
-	if (bg_counter.debug) console.log('POST REQUEST: '+request);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState != 4) return;
-		if (xhr.status == 200) {
-			if (xhr.responseText) {
-				var response =  JSON.parse(xhr.responseText);
-				if (response.success) {
-					// Здесь надо будет добавить вывод данных на экран
-					if (bg_counter.debug) {
-						console.log('POST REQUEST: '+request+' result:');
-						console.log(JSON.stringify(response.data));
-					}
-					setViewCount (type, id, bg_counter_number_format(response.data.value), addDelimiter(response.data.now+1));
-				} else {
-					if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR: '+response.error);
-				}
-			} else {
-				if (bg_counter.debug) console.warn('POST REQUEST: '+request+' Warning: responseText is empty!');
+	
+	jQuery.ajax ({
+		url: request,
+		type: "POST",
+		success: function(response){
+			// Здесь надо будет добавить вывод данных на экран
+			if (bg_counter.debug) {
+				console.log('POST REQUEST: '+request+' result:');
+				console.log(JSON.stringify(response.data));
 			}
-		} else {
+			setViewCount (type, id, bg_counter_number_format(response.data.value), addDelimiter(response.data.now+1));
+		},
+		error: function(xhr) {
 			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
 		}
-	}
-	xhr.send();
-
+	});
 }
 
 /*********************************************************************************
@@ -243,15 +231,16 @@ function fullBatchQuery(socket) {
 	if( typeof elem == 'undefined' ) return false;					// Нет полей для вывода информации на странице
 	if (notconnected > bg_counter.maxreconnect) return false;		// Не более maxReConnect сбоев при запросе
 
-	if (elem.length > bg_counter_elements) {
+	if (elem.length > bg_counter_elements) {						// Если количество счетчиков на странице больше уже учтенных
 		var data_added = new Array();
 		var data = new Array();
 		var i = 0;
 		var elem_num = 0;
+		// Для каждого счетчика
 		elem.each (function () {
 			var el = jQuery(this);
 			var project = el.attr('data-project');
-			if (project == "") path = "/";
+			if (project == "") path = "/";							// Формируем путь
 			else {
 				if (project == undefined) project = bg_counter.project;
 				else project = '/project/'+project;
@@ -260,16 +249,16 @@ function fullBatchQuery(socket) {
 				if (!type || !id) var path = project;
 				else var path = project+"/"+type+"/"+id;
 			}
-			if (elem_num >= bg_counter_elements) {
-				data_added[i] = path; //*************
+			if (elem_num >= bg_counter_elements) {					// Только новые данные
+				data_added[i] = path; 
 				i++;
 			}
-			data[elem_num] = path;
+			data[elem_num] = path;									// Все данные
 			elem_num++;
 		});
-		bg_counter_elements = elem.length;
+		bg_counter_elements = elem.length;							// Учитены все счетчики на страниц
 		
-		if (data_added.length) {
+		if (data_added.length) {									// Если есть добавленые счетчики
 			var request = bg_counter.batch;
 			var json_added = JSON.stringify(data_added);
 			var json = JSON.stringify(data);
@@ -278,54 +267,53 @@ function fullBatchQuery(socket) {
 				console.log(" Path ("+i+"): "+json);
 			}
 	
-			// Пакетный запрос
-			var xhr = new XMLHttpRequest();
-			xhr.open("POST", request, true);
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
-				if (xhr.status == 200) {
-					if (xhr.responseText) {
-						var response =  JSON.parse(xhr.responseText);
-						if (bg_counter.debug) console.log('POST REQUEST: '+request+' result:');
-						if (bg_counter.debug) console.log(JSON.stringify(response)); 
-						jQuery('span.bg-az-counter').each (function () {
-							var el = jQuery(this);
-							var type = el.attr('data-type');
-							var id = el.attr('data-ID');
-							var project = el.attr('data-project');
-							if (project == "") path = "/";
-							else {
-								if (project == undefined) project = bg_counter.project.replace('/project/','/project:');
-								else project = '/project:'+project;
-								if (!type || !id) var path = project;
-								else var path = project+"/"+type+":"+id;
-							}
-							for (var key in response) {
-								if(path == key) {
-									if (response[key].viewCounter) 
-										el.find('span.bg-az-counter-views').text(bg_counter_number_format(response[key].viewCounter));
-									else
-										el.find('span.bg-az-counter-views').text(0);
-									el.find('span.bg-az-counter-now').text(addDelimiter(response[key].onlineCounter));
-									if (response[key].rating) 
-										el.find('span.bg-az-counter-score').text(parseFloat(response[key].rating.score).toFixed(1));
-									else 
-										el.find('span.bg-az-counter-score').text('-');
-								}
-							}
-						});
-					} else {
-						if (bg_counter.debug) console.warn('POST REQUEST: '+request+' Warning: responseText is empty!');
+			// Пакетный запрос batch-query
+			jQuery.ajax ({
+				url: request,
+				type: "POST",
+				data: json_added,
+				success: function(data){
+					// Здесь надо будет добавить вывод данных на экран
+					if (bg_counter.debug) {
+						console.log('POST REQUEST: '+request+' result:');
+						console.log(JSON.stringify(data));
 					}
-				} else {
+					// Для каждого счетчика
+					jQuery('span.bg-az-counter').each (function () {
+						var el = jQuery(this);
+						var type = el.attr('data-type');
+						var id = el.attr('data-ID');
+						var project = el.attr('data-project');
+						if (project == "") path = "/";				// Формируем путь
+						else {
+							if (project == undefined) project = bg_counter.project.replace('/project/','/project:');
+							else project = '/project:'+project;
+							if (!type || !id) var path = project;
+							else var path = project+"/"+type+":"+id;
+						}
+						for (var key in data) {
+							if(path == key) {						// Сравниваем путь с ключем присланных данных
+								// Количество посещений
+								if (data[key].viewCounter) 
+									el.find('span.bg-az-counter-views').text(bg_counter_number_format(data[key].viewCounter));
+								else
+									el.find('span.bg-az-counter-views').text(0);
+								// Количество online-посетителей
+								el.find('span.bg-az-counter-now').text(addDelimiter(data[key].onlineCounter));
+								// Райтинг
+								if (data[key].rating) 
+									el.find('span.bg-az-counter-score').text(parseFloat(data[key].rating.score).toFixed(1));
+								else 
+									el.find('span.bg-az-counter-score').text('-');
+							}
+						}
+					});
+				},
+				error: function(xhr) {
 					if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
-					notconnected++;
+					notconnected++;			// Количество повторов запросов
 				}
-			}
-			xhr.onerror = function(err) {
-				console.warn(err.type +" "+ err.target.status + ". Check if the server is running!");  
-			}
-			xhr.send(json_added); 
+			});
 
 			// Отправляем данные, как только сокет будет подключен
 			if (socket.readyState == WebSocket.OPEN) {

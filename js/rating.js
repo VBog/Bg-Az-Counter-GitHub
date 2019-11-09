@@ -82,43 +82,39 @@ GET /item-score/project/test/author/1
 function getRate(type, id) {
 	
 	var request = bg_counter.scoreurl+bg_counter.project+"/"+type+"/"+id;
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", request, true);
-	if (bg_counter.debug) console.log('GET REQUEST: '+request);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			if (xhr.responseText) {
-				var response =  JSON.parse(xhr.responseText);
-				if (response.success) {
-					// Вывод данных на экран
-					if (bg_counter.debug) console.log(JSON.stringify(response.data));
-						m = response.data.votes % 10; 
-						j = response.data.votes % 100;
-						if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
-						else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
-						else txt_votes = bg_counter.vote1;
-						start_rate_index = parseFloat(response.data.score).toFixed(1);
-						jQuery('#bg_counter_votes').html(response.data.votes);
-						jQuery('#bg_counter_votes_txt').html(txt_votes);
-						jQuery('#bg_counter_score').html(start_rate_index);
-						jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
-						jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
-						rating_voted = response.data.alreadyVoted;
-						iniRatingState(start_rate_index, rating_voted);	
-				} else {
-					if (bg_counter.debug) console.log('GET REQUEST: '+request+' ERROR: '+response.error);
-					jQuery('#bg_counter_votes').html('0');
-					jQuery('#bg_counter_votes_txt').html(bg_counter.votes5);
-					jQuery('#bg_counter_score').html('0');
-					jQuery('meta[itemprop=ratingCount]').attr("content", 0);
-					jQuery('meta[itemprop=ratingValue]').attr("content", 0);
-					iniRatingState(0, false);	
-				}
-			}
-		}
-	}
-	xhr.send();
 
+	jQuery.ajax ({
+		url: request,
+		type: "GET",
+		success: function(response){
+			if (bg_counter.debug) {
+				console.log('POST REQUEST: '+request+' result:');
+				console.log(JSON.stringify(response));
+			}
+			m = response.data.votes % 10; 
+			j = response.data.votes % 100;
+			if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
+			else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
+			else txt_votes = bg_counter.vote1;
+			start_rate_index = parseFloat(response.data.score).toFixed(1);
+			jQuery('#bg_counter_votes').html(response.data.votes);
+			jQuery('#bg_counter_votes_txt').html(txt_votes);
+			jQuery('#bg_counter_score').html(start_rate_index);
+			jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
+			jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
+			rating_voted = response.data.alreadyVoted;
+			iniRatingState(start_rate_index, rating_voted);	
+		},
+		error: function(xhr) {
+			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
+			jQuery('#bg_counter_votes').html('0');
+			jQuery('#bg_counter_votes_txt').html(bg_counter.votes5);
+			jQuery('#bg_counter_score').html('0');
+			jQuery('meta[itemprop=ratingCount]').attr("content", 0);
+			jQuery('meta[itemprop=ratingValue]').attr("content", 0);
+			iniRatingState(0, false);	
+		}
+	});
 }
 /*********************************************************************************
 POST /rate/<path>
@@ -146,35 +142,32 @@ POST /rate/project/test/author/1/book/3
 function sendRate(type, id, number) {
 	
 	var request = bg_counter.rateurl+bg_counter.project+"/"+type+"/"+id;
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", request, true);
-	if (bg_counter.debug) console.log('POST REQUEST: '+request);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			if (xhr.responseText) {
-				var response =  JSON.parse(xhr.responseText);
-				if (response.success) {
-					// Вывод данных на экран
-					if (bg_counter.debug) console.log(JSON.stringify(response.data));
-						m = response.data.votes % 10; 
-						j = response.data.votes % 100;
-						if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
-						else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
-						else txt_votes = bg_counter.vote1;
-						start_rate_index = parseFloat(response.data.score).toFixed(1);
-						jQuery('#bg_counter_votes').html(response.data.votes);
-						jQuery('#bg_counter_votes_txt').html(txt_votes);
-						jQuery('#bg_counter_score').html(start_rate_index);
-						jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
-						jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
-						iniRatingState(start_rate_index, true);
-						getAllRates();
-				} else {
-					if (bg_counter.debug) console.log('POST REQUEST: '+request+' ERROR: '+response.error);
-				}
-			}
-		}
-	}
-	xhr.send('{"rating": '+number+'}');
 
+	jQuery.ajax ({
+		url: request,
+		type: "POST",
+		success: function(response){
+			// Вывод данных на экран
+			if (bg_counter.debug) {
+				console.log('POST REQUEST: '+request+' result:');
+				console.log(JSON.stringify(response));
+			}
+			m = response.data.votes % 10; 
+			j = response.data.votes % 100;
+			if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
+			else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
+			else txt_votes = bg_counter.vote1;
+			start_rate_index = parseFloat(response.data.score).toFixed(1);
+			jQuery('#bg_counter_votes').html(response.data.votes);
+			jQuery('#bg_counter_votes_txt').html(txt_votes);
+			jQuery('#bg_counter_score').html(start_rate_index);
+			jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
+			jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
+			iniRatingState(start_rate_index, true);
+			getAllRates();
+		},
+		error: function(xhr) {
+			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
+		}
+	});
 }
