@@ -139,12 +139,14 @@ function SendOnce(type, id) {
 		url: request,
 		type: "POST",
 		success: function(response){
-			// Здесь надо будет добавить вывод данных на экран
-			if (bg_counter.debug) {
-				console.log('POST REQUEST: '+request+' result:');
-				console.log(JSON.stringify(response.data));
+			if (response.success) {
+				// Здесь надо будет добавить вывод данных на экран
+				if (bg_counter.debug) {
+					console.log('POST REQUEST: '+request+' result:');
+					console.log(JSON.stringify(response.data));
+				}
+				setViewCount (type, id, bg_counter_number_format(response.data.value), addDelimiter(response.data.now+1));
 			}
-			setViewCount (type, id, bg_counter_number_format(response.data.value), addDelimiter(response.data.now+1));
 		},
 		error: function(xhr) {
 			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
@@ -315,12 +317,14 @@ function fullBatchQuery(socket) {
 				}
 			});
 
-			// Отправляем данные, как только сокет будет подключен
-			if (socket.readyState == WebSocket.OPEN) {
-				socket.send(json);
-			} else {
-				socket.onopen = function() {
+			if (socket !== undefined) {
+				// Отправляем данные, как только сокет будет подключен
+				if (socket.readyState == WebSocket.OPEN) {
 					socket.send(json);
+				} else {
+					socket.onopen = function() {
+						socket.send(json);
+					}
 				}
 			}
 		}

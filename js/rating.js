@@ -87,32 +87,35 @@ function getRate(type, id) {
 		url: request,
 		type: "GET",
 		success: function(response){
-			if (bg_counter.debug) {
-				console.log('POST REQUEST: '+request+' result:');
-				console.log(JSON.stringify(response));
+			if (response.success) {
+				if (bg_counter.debug) {
+					console.log('POST REQUEST: '+request+' result:');
+					console.log(JSON.stringify(response));
+				}
+				m = response.data.votes % 10; 
+				j = response.data.votes % 100;
+				if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
+				else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
+				else txt_votes = bg_counter.vote1;
+				start_rate_index = parseFloat(response.data.score).toFixed(1);
+				jQuery('#bg_counter_votes').html(response.data.votes);
+				jQuery('#bg_counter_votes_txt').html(txt_votes);
+				jQuery('#bg_counter_score').html(start_rate_index);
+				jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
+				jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
+				rating_voted = response.data.alreadyVoted;
+				iniRatingState(start_rate_index, rating_voted);	
+			} else {
+				jQuery('#bg_counter_votes').html('0');
+				jQuery('#bg_counter_votes_txt').html(bg_counter.votes5);
+				jQuery('#bg_counter_score').html('0');
+				jQuery('meta[itemprop=ratingCount]').attr("content", 0);
+				jQuery('meta[itemprop=ratingValue]').attr("content", 0);
+				iniRatingState(0, false);	
 			}
-			m = response.data.votes % 10; 
-			j = response.data.votes % 100;
-			if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
-			else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
-			else txt_votes = bg_counter.vote1;
-			start_rate_index = parseFloat(response.data.score).toFixed(1);
-			jQuery('#bg_counter_votes').html(response.data.votes);
-			jQuery('#bg_counter_votes_txt').html(txt_votes);
-			jQuery('#bg_counter_score').html(start_rate_index);
-			jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
-			jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
-			rating_voted = response.data.alreadyVoted;
-			iniRatingState(start_rate_index, rating_voted);	
 		},
 		error: function(xhr) {
 			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
-			jQuery('#bg_counter_votes').html('0');
-			jQuery('#bg_counter_votes_txt').html(bg_counter.votes5);
-			jQuery('#bg_counter_score').html('0');
-			jQuery('meta[itemprop=ratingCount]').attr("content", 0);
-			jQuery('meta[itemprop=ratingValue]').attr("content", 0);
-			iniRatingState(0, false);	
 		}
 	});
 }
@@ -146,25 +149,43 @@ function sendRate(type, id, number) {
 	jQuery.ajax ({
 		url: request,
 		type: "POST",
+		data: '{"rating": '+number+'}',
 		success: function(response){
-			// Вывод данных на экран
-			if (bg_counter.debug) {
-				console.log('POST REQUEST: '+request+' result:');
-				console.log(JSON.stringify(response));
+			if (response.success) {
+				// Вывод данных на экран
+				if (bg_counter.debug) {
+					console.log('POST REQUEST: '+request+' result:');
+					console.log(JSON.stringify(response));
+				}
+				m = response.data.votes % 10; 
+				j = response.data.votes % 100;
+				if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
+				else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
+				else txt_votes = bg_counter.vote1;
+				start_rate_index = parseFloat(response.data.score).toFixed(1);
+				jQuery('#bg_counter_votes').html(response.data.votes);
+				jQuery('#bg_counter_votes_txt').html(txt_votes);
+				jQuery('#bg_counter_score').html(start_rate_index);
+				jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
+				jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
+				iniRatingState(start_rate_index, true);
+				
+				jQuery('span.bg-az-counter').each (function () {
+					var el = jQuery(this);
+					var type = el.attr('data-type');
+					var id = el.attr('data-ID');
+					var project = el.attr('data-project');
+					if (project == "") path = "/";				// Формируем путь
+					else {
+						if (project == undefined) project = bg_counter.project;
+						else project = '/project/'+project;
+						if (!type || !id) var path = project;
+						else var path = project+"/"+type+"/"+id;
+					}
+					if (request == bg_counter.rateurl+path) el.find('span.bg-az-counter-score').text(parseFloat(response.data.score).toFixed(1));
+				});
+//				fullBatchQuery();
 			}
-			m = response.data.votes % 10; 
-			j = response.data.votes % 100;
-			if(m==0 || m>=5 || (j>=10 && j<=20)) txt_votes = bg_counter.votes5;
-			else if(m>=2 && m<=4) txt_votes = bg_counter.votes2; 
-			else txt_votes = bg_counter.vote1;
-			start_rate_index = parseFloat(response.data.score).toFixed(1);
-			jQuery('#bg_counter_votes').html(response.data.votes);
-			jQuery('#bg_counter_votes_txt').html(txt_votes);
-			jQuery('#bg_counter_score').html(start_rate_index);
-			jQuery('meta[itemprop=ratingCount]').attr("content", response.data.votes);
-			jQuery('meta[itemprop=ratingValue]').attr("content", start_rate_index);
-			iniRatingState(start_rate_index, true);
-			getAllRates();
 		},
 		error: function(xhr) {
 			if (bg_counter.debug) console.warn('POST REQUEST: '+request+' ERROR '+xhr.status+': '+xhr.statusText);
