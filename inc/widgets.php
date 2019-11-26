@@ -116,6 +116,10 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 	public function form( $instance ) {
 		if ( isset( $instance[ 'title' ] ) ) {
 			$title = $instance[ 'title' ];
+			$subtitle1 = $instance['subtitle1'];
+			$unit1 = $instance['unit1'];
+			$subtitle2 = $instance['subtitle2'];
+			$subtitle3 = $instance['subtitle3'];
 		}
 		?>
 		<p>
