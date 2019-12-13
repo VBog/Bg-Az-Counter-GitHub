@@ -96,6 +96,13 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
  
 		if ( ! empty( $title ) )
 			echo $args['before_title'] . $title . $args['after_title'];
+		
+		$post_types_count = 0;
+		$post_types = get_post_types( [ 'publicly_queryable'=>1 ] );
+		unset( $post_types['attachment'] ); // удалим attachment
+		foreach ( $post_types as $post_type ) {
+			$post_types_count += wp_count_posts($post_type)->publish;
+		}
  
 ?>
 	<div class="widget-item">
@@ -103,7 +110,7 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 			<span class="bg-az-counter">
 				<p><?php echo $subtitle1; ?>: <span class="bg-az-counter-now"></span> <?php echo $unit1; ?></p>
 				<p><?php echo $subtitle2; ?>: <span class="bg-az-counter-views"></span></p>
-				<p><?php echo $subtitle3; ?>: <span class="bg-az-counter-posts"><?php echo wp_count_posts()->publish; ?></span></p>
+				<p><?php echo $subtitle3; ?>: <span class="bg-az-counter-posts"><?php echo $post_types_count; ?></span></p>
 
 			</span>
 		</div>

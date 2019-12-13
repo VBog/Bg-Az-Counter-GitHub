@@ -260,11 +260,20 @@ function bg_counter_top_posts_shortcode( $atts ) {
 function bg_counter_number_format ($num) {
 	$num = floatval ($num);
 	if ($num > 1000000000.0) {
-		$num = round($num/1000000000.0, 1)."&nbsp;млрд.";
+		if ($num > 10000000000.0) 
+			$num = round($num/1000000000.0, 0)."&nbsp;млрд.";
+		else
+			$num = round($num/1000000000.0, 1)."&nbsp;млрд.";
 	} elseif ($num > 1000000.0) {
-		$num = round($num/1000000.0, 1)."&nbsp;млн.";
+		if ($num > 10000000.0) 
+			$num = round($num/1000000.0, 0)."&nbsp;млн.";
+		else
+			$num = round($num/1000000.0, 1)."&nbsp;млн.";
 	} elseif ($num > 10000.0) {
-		$num = round($num/1000.0, 1)."&nbsp;тыс.";
+		if ($num > 100000.0)
+			$num = round($num/1000.0, 0)."&nbsp;тыс.";
+		else
+			$num = round($num/1000.0, 1)."&nbsp;тыс.";
 	} else {
 		$num = number_format($num, 0, ',', '&nbsp;');
 	}
