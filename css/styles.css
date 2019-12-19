@@ -27,6 +27,7 @@
 }
 .widget-item li .bg-az-count,
 .widget-item p .bg-az-counter-now,
+.widget-item p .bg-az-counter-unit,
 .widget-item p .bg-az-counter-views,
 .widget-item p .bg-az-counter-posts  {
 	color: #999;
@@ -40,6 +41,31 @@
 i.fa-user-o:before,
 i.fa-star-o:before {
 	margin-left: 1em;
+}
+
+.widget-item .bg-az-counter,
+.widget-item .bg-az-top-posts {
+	display: table;
+	width: 100%;
+	max-width: 35em;
+	margin: 0 auto;
+}
+
+.widget-item .bg-az-counter p,
+.widget-item .bg-az-top-posts li {
+	display: table-row;
+}
+.widget-item .bg-az-counter p>span,
+.widget-item li>a,
+.widget-item li>span {
+	display: table-cell;
+	text-align: right;
+}
+.widget-item .bg-az-counter p>span.bg-az-counter-title,
+.widget-item li>a {
+	width: 100%;
+	padding: 0 3px 5px 3px;	
+	text-align: left;
 }
 
 /*	Рейтинг */

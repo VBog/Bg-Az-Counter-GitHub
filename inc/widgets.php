@@ -108,10 +108,9 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 	<div class="widget-item">
 		<div class="widget-inner">
 			<span class="bg-az-counter">
-				<p><?php echo $subtitle1; ?>: <span class="bg-az-counter-now"></span> <?php echo $unit1; ?></p>
-				<p><?php echo $subtitle2; ?>: <span class="bg-az-counter-views"></span></p>
-				<p><?php echo $subtitle3; ?>: <span class="bg-az-counter-posts"><?php echo $post_types_count; ?></span></p>
-
+				<p><span class="bg-az-counter-title"><?php echo $subtitle1; ?></span> <span><span class="bg-az-counter-now"></span>&nbsp;<span class="bg-az-counter-unit"><?php echo $unit1; ?></span></span></p>
+				<p><span class="bg-az-counter-title"><?php echo $subtitle2; ?></span> <span class="bg-az-counter-views"></span></p>
+				<p><span class="bg-az-counter-title"><?php echo $subtitle3; ?></span> <span class="bg-az-counter-posts"><?php echo $post_types_count; ?></span></p>
 			</span>
 		</div>
 	</div>

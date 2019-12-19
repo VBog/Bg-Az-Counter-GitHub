@@ -63,7 +63,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 				if (!$post) continue;
 				$title = $post->post_title;
 				$link = '<a href="'. get_permalink($post).'" title="'.$title.'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-value="'.$p->value.'" data-status="'.$post->post_status.'">'.$title.'</a>';
-				$quote .= '<li>'.$link.' - <span class="bg-az-count">'.bg_counter_number_format($p->value).'</span></li>'. PHP_EOL;
+				$quote .= '<li>'.$link.' <span class="bg-az-count">'.bg_counter_number_format($p->value).'</span></li>'. PHP_EOL;
 			}
 			if ($number) $quote .= '</ol>'. PHP_EOL;
 			else $quote .= '</ul>'. PHP_EOL;
