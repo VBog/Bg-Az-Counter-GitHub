@@ -61,6 +61,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 				if (!$id) continue;
 				$post = get_post($id);
 				if (!$post) continue;
+				if ($post->post_status != 'publish') continue;
 				$title = $post->post_title;
 				$link = '<a href="'. get_permalink($post).'" title="'.$title.'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-value="'.$p->value.'" data-status="'.$post->post_status.'">'.$title.'</a>';
 				$quote .= '<li>'.$link.' <span class="bg-az-count">'.bg_counter_number_format($p->value).'</span></li>'. PHP_EOL;
@@ -269,8 +270,8 @@ function bg_counter_number_format ($num) {
 			$num = round($num/1000000.0, 0)."&nbsp;млн.";
 		else
 			$num = round($num/1000000.0, 1)."&nbsp;млн.";
-	} elseif ($num > 10000.0) {
-		if ($num > 100000.0)
+	} elseif ($num > 1000.0) {
+		if ($num > 10000.0)
 			$num = round($num/1000.0, 0)."&nbsp;тыс.";
 		else
 			$num = round($num/1000.0, 1)."&nbsp;тыс.";
