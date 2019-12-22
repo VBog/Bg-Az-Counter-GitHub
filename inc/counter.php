@@ -77,6 +77,53 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 	}
 }
 /*****************************************************************************************
+GET /counters/<path>
+
+Возвращает текущие значения счётчика - общий счётчик и количество
+просматривающих в данный момент.
+
+Пример запроса:
+
+GET /counters/project/test/author/1/book/3
+
+Пример ответа:
+
+{
+  "success":true,
+  "data":{
+    "now":3,
+    "total":34
+  }
+}
+
+******************************************************************************************/
+// Получить 1 счетчик
+function getCount ($path) {
+	global $project;
+	
+	$result = wp_remote_get (BG_COUNTER_STAT_COUNTERS.$project.$path);
+	if( is_wp_error( $result ) ) {
+		error_log(  PHP_EOL .current_time('mysql')." COUNTERS. Ошибка при получении данных с сервера: ".$result->get_error_message(), 3, BG_COUNTER_LOG );	// сообщение ошибки
+		error_log(  " " .$result->get_error_code(), 3, BG_COUNTER_LOG ); 		// ключ ошибки
+		return false; 
+	}
+	if (($code = wp_remote_retrieve_response_code( $result )) != 200) {
+		error_log(  PHP_EOL .current_time('mysql')." RATING (top posts). Сервер вернул код ошибки: ".$code, 3, BG_COUNTER_LOG );	// сообщение ошибки
+		error_log(  " " .wp_remote_retrieve_response_message( $result ), 3, BG_COUNTER_LOG ); 		// ключ ошибки
+		return false; 
+	}
+
+	$json = wp_remote_retrieve_body($result);
+	$response = json_decode($json, false);
+	if ($response->success) {
+		return $response->data;
+	} else {
+		error_log(  PHP_EOL .current_time('mysql')." COUNTERS. Сервер вернул ответ неудачи:\n".$json, 3, BG_COUNTER_LOG );
+		return false;
+	}
+	
+}
+/*****************************************************************************************
 POST /set-counter/<path>
 
 Задаёт значение счётчика и создаёт его, если счётчик не существовал.

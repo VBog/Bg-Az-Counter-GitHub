@@ -3,7 +3,7 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.7.6
+    Version: 2.8
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.7.6');
+define('BG_COUNTER_VERSION', '2.8');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');
@@ -155,3 +155,50 @@ function bg_counter_deinstall() {
 include_once ("inc/counter.php");
 // Запускаем голосование
 include_once ("inc/rating.php");
+
+/*****************************************************************************************
+
+	Блок фальсификации данных статистики
+	
+******************************************************************************************/
+add_action('admin_init', 'azbyka_falsification', 1);
+// Создание блока в админке
+function azbyka_falsification() {
+    add_meta_box( 'azbyka_falsification', 'Фальсификация статистики', 'azbyka_falsification_box_func', 'post', 'side', 'high'  );
+}
+// Добавление поля 'Фальсификация данных статистики'
+function azbyka_falsification_box_func( $post ){
+    wp_nonce_field( basename( __FILE__ ), 'azbyka_falsification_nonce' );
+	$path = '/post/'.$post->ID;
+	$count = getCount($path);
+	if ($count)	$count = $count->total; 
+	else $count = "Нет счетчика";
+?>
+    <b>Количество посещений:</b> <?php echo $count; ?><br>
+	<label>Введите любое число > 0:<br>
+		<input type="number" name="azbyka_falsh_counts" value="" min=1 /><br>и нажмите кнопку "Опубликовать/Обновить".
+	</label>
+	<i>Если оставить поле пустым, счетчик сохранит свое истинное значение.</i>
+<?php
+}
+// Сохранение значений счетчика при автосохранении поста
+add_action('save_post', 'azbyka_falsification_update', 0);
+
+// Сохранение значений счетчика при сохранении поста
+function azbyka_falsification_update( $post_id ){
+
+    // проверяем, пришёл ли запрос со страницы с метабоксом
+    if ( !isset( $_POST['azbyka_falsification_nonce'] )
+    || !wp_verify_nonce( $_POST['azbyka_falsification_nonce'], basename( __FILE__ ) ) ) return $post_id;
+    // проверяем, является ли запрос автосохранением
+    if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+    // проверяем, права пользователя, может ли он редактировать записи
+    if ( !current_user_can( 'edit_post', $post_id ) ) return $post_id;
+
+     if ( !empty( $_POST['azbyka_falsh_counts'] ) ) {
+		$counter = (int) $_POST['azbyka_falsh_counts'];
+		$path = '/post/'.$post_id;
+		if ($counter > 0) setCount ($path, $counter);
+	 }
+}
+
