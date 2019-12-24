@@ -4,7 +4,7 @@
 	margin: 5px;
 	padding: 0;
 }
-.widget-item .bg-az-top-posts li,
+.widget-item .bg-az-top-posts>li,
 .widget-item .bg-az-counter p {
 	margin: 0px;
 	padding: 5px;
@@ -21,18 +21,18 @@
 	border: none;
 	border-radius: 50%;
 }
-.widget-item li a,
+.widget-item .bg-az-top-posts>li a,
 .widget-item .bg-az-counter p {
 	color: #90694a;
 }
-.widget-item li .bg-az-count,
+.widget-item .bg-az-top-posts>li .bg-az-count,
 .widget-item p .bg-az-counter-now,
 .widget-item p .bg-az-counter-unit,
 .widget-item p .bg-az-counter-views,
 .widget-item p .bg-az-counter-posts  {
 	color: #999;
 }
-.widget-item li:hover {
+.widget-item .bg-az-top-posts>li:hover {
 	background: #fff;
 	color: #e88f57;
 	transition: all .4s ease;
@@ -52,17 +52,17 @@ i.fa-star-o:before {
 }
 
 .widget-item .bg-az-counter p,
-.widget-item .bg-az-top-posts li {
+.widget-item .bg-az-top-posts>li {
 	display: table-row;
 }
 .widget-item .bg-az-counter p>span,
-.widget-item li>a,
-.widget-item li>span {
+.widget-item .bg-az-top-posts>li>a,
+.widget-item .bg-az-top-posts>li>span {
 	display: table-cell;
 	text-align: right;
 }
 .widget-item .bg-az-counter p>span.bg-az-counter-title,
-.widget-item li>a {
+.widget-item .bg-az-top-posts>li>a {
 	width: 100%;
 	padding: 0 3px 5px 3px;	
 	text-align: left;

@@ -35,6 +35,8 @@ GET /item-score/project/test/author/1
 function bg_az_counter_rating($type, $id) {
 	global $project;
 
+	$option = get_option('bg_counter_options');
+	if (!$option['rate']) return false;
 	if (!$id) return false;
 	if ($type == 'post') {
 		// Список типов записей имеющих страницу во фронте
@@ -46,7 +48,6 @@ function bg_az_counter_rating($type, $id) {
 		if (get_post_status($id) != 'publish') return false;
 	} else return false;
 	
-	$option = get_option('bg_counter_options');
 	if ($option['title']) $page_title = $option['title'];
 	else $page_title = get_the_title($id);
 	if ($option['author']) $author = $option['author'];
