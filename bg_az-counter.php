@@ -3,7 +3,7 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.8.1
+    Version: 2.8.2
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.8.1');
+define('BG_COUNTER_VERSION', '2.8.2');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');
@@ -164,7 +164,10 @@ include_once ("inc/rating.php");
 add_action('admin_init', 'azbyka_falsification', 1);
 // Создание блока в админке
 function azbyka_falsification() {
-    add_meta_box( 'azbyka_falsification', 'Фальсификация статистики', 'azbyka_falsification_box_func', 'post', 'side', 'high'  );
+	$post_types = get_post_types( [ 'publicly_queryable'=>1 ] );
+	$post_types['page'] = 'page';       // встроенный тип не имеет publicly_queryable
+	unset( $post_types['attachment'] ); // удалим attachment
+    add_meta_box( 'azbyka_falsification', 'Фальсификация статистики', 'azbyka_falsification_box_func', $post_types, 'side', 'high'  );
 }
 // Добавление поля 'Фальсификация данных статистики'
 function azbyka_falsification_box_func( $post ){
