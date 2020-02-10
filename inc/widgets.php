@@ -99,6 +99,7 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 		
 		$post_types_count = 0;
 		$post_types = get_post_types( [ 'publicly_queryable'=>1 ] );
+		$post_types['page'] = 'page';       // встроенный тип не имеет publicly_queryable
 		unset( $post_types['attachment'] ); // удалим attachment
 		foreach ( $post_types as $post_type ) {
 			$post_types_count += wp_count_posts($post_type)->publish;
