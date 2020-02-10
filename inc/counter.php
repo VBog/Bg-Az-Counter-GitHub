@@ -244,7 +244,7 @@ function bg_az_counter_views ($type=null, $id=null, $now=null, $rate=null, $view
 		$link = get_permalink($id);
 		// Получить имя проекта по ссылке
 		if (wp_parse_url( $link, PHP_URL_HOST ) == 'azbyka.ru') {
-			if (is_front_page()) $proj = wp_parse_url( $link, PHP_URL_PATH );
+			if (is_front_page() && !is_home()) $proj = wp_parse_url( $link, PHP_URL_PATH );
 			else $proj = wp_parse_url( dirname($link), PHP_URL_PATH );
 			$proj = trim($proj, '/');
 			if (!$proj) $proj = 'main';	// Главный сайт 
