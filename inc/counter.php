@@ -239,6 +239,7 @@ function bg_az_counter_views ($type=null, $id=null, $now=null, $rate=null, $view
 		$rate = $option['rate'];
 	}
 	if ($type != 'post') $rate = null;
+	if (get_post_meta($id, 'не_отображать_рейтинг',true)) $rate = null;
 	
 	if ($id) {
 		$link = get_permalink($id);
