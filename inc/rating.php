@@ -46,6 +46,7 @@ function bg_az_counter_rating($type, $id) {
 		$the_type = get_post_type($id);
 		if (!in_array($the_type, $post_types)) return false;
 		if (get_post_status($id) != 'publish') return false;
+		if (get_post_meta($id, 'не_отображать_рейтинг',true)) return false;
 	} else return false;
 	
 	if ($option['title']) $page_title = $option['title'];
