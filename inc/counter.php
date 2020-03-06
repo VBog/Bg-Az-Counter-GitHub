@@ -257,7 +257,7 @@ function bg_az_counter_views ($type=null, $id=null, $now=null, $rate=null, $view
 			$proj = preg_replace('#[\.\/\\\\]#i', '_', $proj) ;
 		}
 		$proj = '/project/'.$proj;
-		if (is_null($pr) && (($project != $proj) || get_post_meta( $id, 'link', true ))) $id = null;// Заглушка для ссылок на другие проекты
+		if (is_null($pr) && (($project != substr($proj,0, strlen ($project))) || get_post_meta( $id, 'link', true ))) $id = null;// Заглушка для ссылок на другие проекты
 	}
 	
 	if (!is_null($type) && !is_null($id)) {
