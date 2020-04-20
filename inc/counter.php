@@ -240,6 +240,7 @@ function bg_az_counter_views ($type=null, $id=null, $now=null, $rate=null, $view
 	}
 	if ($type != 'post') $rate = null;
 	if (get_post_meta($id, 'не_отображать_рейтинг',true)) $rate = null;
+	if (get_post_meta($id, 'отключить_счетчик',true)) $views = null;
 	
 	if ($id) {
 		$link = get_permalink($id);
