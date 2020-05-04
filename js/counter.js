@@ -10,7 +10,8 @@ jQuery( document ).ready(function() {
 **********************************************************************************/
 
 	if (bg_counter.ID) {
-		if (bg_counter.countviews) SendOnce(bg_counter.type, bg_counter.ID);
+		if (typeof bg_counter.countviews === 'undefined') bg_counter.countviews = 'on'; // Поддержка старых страниц вне WP
+		if (bg_counter.countviews == 'on') SendOnce(bg_counter.type, bg_counter.ID);
 		var request = bg_counter.websocket+bg_counter.project+"/"+bg_counter.type+"/"+bg_counter.ID;
 	// Используется библиотека ReconnectingWebSocket (https://github.com/joewalnes/reconnecting-websocket)
 	// для переподключения сокета при разрыве соединения. 

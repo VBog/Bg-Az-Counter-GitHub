@@ -3,7 +3,7 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.10.0
+    Version: 2.10.1
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.10.0');
+define('BG_COUNTER_VERSION', '2.10.1');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');
@@ -93,12 +93,15 @@ function bg_counter_enqueue_frontend_scripts () {
 	
 	$theID = '';
 	$type = '';
+	$countviews = 'on';
 	if (is_single() || is_page()) {	// Только записи и страницы
 		$post = get_post();
 		if ($post->post_status == 'publish') {	// Только опубликованные
 			$theID = $post->ID;
 			$type = 'post';
+			$countviews = get_post_meta($theID, 'отключить_счетчик',true)?'':'on';
 		}
+		else $countviews = '';
 	} elseif (is_category()) {
 		$theID = get_query_var('cat');
 		$type = 'category';
@@ -125,7 +128,7 @@ function bg_counter_enqueue_frontend_scripts () {
 			'project' => $project,								// Имя текущего проекта, например, '/propovedi'
 			'type' => $type,									// Тип объекта 'post', 'category', 'tag', 'index' или пусто
 			'ID' => $theID,										// ID объекта 
-			'countviews' => get_post_meta($post->ID, 'отключить_счетчик',true)?'':'on',
+			'countviews' => $countviews,
 			'votes5' => 'голосов',
 			'votes2' => 'голоcа', 
 			'vote1' => 'голос',
