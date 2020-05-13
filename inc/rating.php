@@ -93,14 +93,7 @@ echo <<<HTML
 		<li></li>
 		<li></li>
 	</ul>
-	<span itemscope="" itemtype="http://schema.org/AggregateRating">
-		<meta itemprop="bestRating" content="5" />
-		<meta itemprop="worstRating" content="1" />
-		<meta itemprop="author" content="{$author}" />
-		<meta itemprop="itemReviewed" content="{$page_title}" />
-
-		<meta content="{$score}" itemprop="ratingValue">
-		<meta content="{$votes}" itemprop="ratingCount">
+	<span>
 		(<span id="bg_counter_votes">{$votes}</span>&nbsp;<span id="bg_counter_votes_txt">{$txt_votes}</span>:&nbsp;<span id="bg_counter_score" data-voted="{$alreadyVoted}">{$score}</span>&nbsp;из&nbsp;<span id="bg_counter_rating_max">5</span>)
 	</span></div>
 	<div id="bg_counter_popup_help"></div>
