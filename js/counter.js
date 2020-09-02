@@ -135,6 +135,12 @@ jQuery( document ).ready(function() {
 function SendOnce(type, id) {
 	
 	var request = bg_counter.counterurl+bg_counter.project+"/"+type+"/"+id;
+
+	// если при конфигурации была допущена ошибка и у нас нет итогового url, мы не отправим запрос
+	if (!request) {
+		console.error(`Ошибка в url ${request}`);
+		return null;
+	}
 	
 	jQuery.ajax ({
 		url: request,
@@ -270,6 +276,11 @@ function fullBatchQuery(socket) {
 				console.log(" Path ("+i+"): "+json);
 			}
 	
+			if (!request) {
+				console.error(`Ошибка в url ${request}`);
+				return null;
+			}
+
 			// Пакетный запрос batch-query
 			jQuery.ajax ({
 				url: request,

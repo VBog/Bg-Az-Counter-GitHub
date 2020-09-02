@@ -83,6 +83,11 @@ function getRate(type, id) {
 	
 	var request = bg_counter.scoreurl+bg_counter.project+"/"+type+"/"+id;
 
+	if (!request) {
+		console.error(`Ошибка в url ${request}`);
+		return null;
+	}
+
 	jQuery.ajax ({
 		url: request,
 		type: "GET",
@@ -145,6 +150,11 @@ POST /rate/project/test/author/1/book/3
 function sendRate(type, id, number) {
 	
 	var request = bg_counter.rateurl+bg_counter.project+"/"+type+"/"+id;
+
+	if (!request) {
+		console.error(`Ошибка в url ${request}`);
+		return null;
+	}
 
 	jQuery.ajax ({
 		url: request,
