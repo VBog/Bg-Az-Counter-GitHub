@@ -219,7 +219,8 @@ function fill_bg_counter_period(){
 	?>
 	<label>
 	<select name="bg_counter_options[period]">
-		<option value="1" <?php selected( 1, $val ); ?>>мгновенно</option>
+		<option value="10" <?php selected( 10, $val ); ?>>мгновенно</option>
+		<option value="<?php echo 5*MINUTE_IN_SECONDS ; ?>" <?php selected( 5*MINUTE_IN_SECONDS , $val ); ?>>каждые 5 минут</option>
 		<option value="<?php echo HOUR_IN_SECONDS; ?>" <?php selected( HOUR_IN_SECONDS, $val ); ?>>каждый час</option>
 		<option value="<?php echo DAY_IN_SECONDS; ?>" <?php selected( DAY_IN_SECONDS, $val ); ?>>ежедневно</option>
 		<option value="<?php echo WEEK_IN_SECONDS; ?>" <?php selected( WEEK_IN_SECONDS, $val ); ?>>еженедельно</option>

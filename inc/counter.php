@@ -52,7 +52,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 	$response = json_decode($json, false);
 	if ($response->success == true){
 		$the_key='getPopularPosts_key_'.$limit.'_'.$offset.'_'.$number;
-		if(false===($quote=get_transient($the_key))) {
+		if(false===($quote=get_transient($the_key)) || intval ($option['period']) <= 10) {
 			if ($number) $quote = '<ol class="bg-az-top-posts">'. PHP_EOL;
 			else $quote = '<ul class="bg-az-top-posts">'. PHP_EOL;
 			foreach ($response->data as $p) {
@@ -68,7 +68,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 			}
 			if ($number) $quote .= '</ol>'. PHP_EOL;
 			else $quote .= '</ul>'. PHP_EOL;
-			set_transient( $the_key, $quote, $option['period'] );
+			set_transient( $the_key, $quote, intval($option['period']) );
 		}
 		return $quote;
 	} else {
