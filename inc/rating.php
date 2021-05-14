@@ -168,7 +168,7 @@ function getPostRating ($limit, $offset=0, $number=false) {
 					error_log(  PHP_EOL .current_time('mysql')." SCORES-LIST. Нет записи: \n".$p->id, 3, BG_COUNTER_LOG );
 					continue;
 				}
-				$link = '<a href="'. get_permalink($post).'" title="'.the_title_attribute($id).'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-score="'.$p->score.'" data-status="'.$post->post_status.'">'.get_the_title($id).'</a>';
+				$link = '<a href="'. get_permalink($post).'" title="'.the_title_attribute(array('echo'=>false, 'post'=>$id)).'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-score="'.$p->score.'" data-status="'.$post->post_status.'">'.get_the_title($id).'</a>';
 				$txt_votes = bg_counter_txt_votes($votes);
 				$txt_score = $votes.'&nbsp;'.$txt_votes.':&nbsp;'.number_format((float)$p->score, 1, ',', '&nbsp;').'&nbsp;из&nbsp;5';
 				$quote .= '<li>'.$link.' -&nbsp;<span class="bg-az-count">'.$txt_score.'</span></li>'. PHP_EOL;

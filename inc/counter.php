@@ -63,7 +63,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 				$post = get_post($id);
 				if (!$post) continue;
 				if ($post->post_status != 'publish') continue;
-				$link = '<a href="'. get_permalink($post).'" title="'.the_title_attribute($id).'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-value="'.$p->value.'" data-status="'.$post->post_status.'">'. get_the_title($id).'</a>';
+				$link = '<a href="'. get_permalink($post).'" title="'.the_title_attribute(array('echo'=>false, 'post'=>$id)).'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-value="'.$p->value.'" data-status="'.$post->post_status.'">'. get_the_title($id).'</a>';
 				$quote .= '<li>'.$link.' <span class="bg-az-count">'.bg_counter_number_format($p->value).'</span></li>'. PHP_EOL;
 				$l++;
 				if ($l > $limit) break;
