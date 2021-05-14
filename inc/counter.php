@@ -34,7 +34,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 	global $project;
 	$option = get_option('bg_counter_options');
 
-	$result = wp_remote_get (BG_COUNTER_STAT_RATING.$project."?limit=".$limit."&offset=".$offset."&type=post");
+	$result = wp_remote_get (BG_COUNTER_STAT_RATING.$project."?limit=".(2*$limit)."&offset=".$offset."&type=post");
 	if( is_wp_error( $result ) ) {
 		error_log(  PHP_EOL .current_time('mysql')." RATING (top posts). Ошибка при получении данных с сервера: ".$result->get_error_message(), 3, BG_COUNTER_LOG );	// сообщение ошибки
 		error_log(  " " .$result->get_error_code(), 3, BG_COUNTER_LOG ); 		// ключ ошибки
@@ -55,6 +55,7 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 		if(false===($quote=get_transient($the_key)) || intval ($option['period']) <= 10) {
 			if ($number) $quote = '<ol class="bg-az-top-posts">'. PHP_EOL;
 			else $quote = '<ul class="bg-az-top-posts">'. PHP_EOL;
+			$l = 0;
 			foreach ($response->data as $p) {
 				if ($p->type!='post') continue;
 				$id = intval($p->id);
@@ -62,9 +63,10 @@ function getPopularPosts ($limit, $offset=0, $number=false) {
 				$post = get_post($id);
 				if (!$post) continue;
 				if ($post->post_status != 'publish') continue;
-				$title = $post->post_title;
-				$link = '<a href="'. get_permalink($post).'" title="'.$title.'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-value="'.$p->value.'" data-status="'.$post->post_status.'">'.$title.'</a>';
+				$link = '<a href="'. get_permalink($post).'" title="'.the_title_attribute($id).'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-value="'.$p->value.'" data-status="'.$post->post_status.'">'. get_the_title($id).'</a>';
 				$quote .= '<li>'.$link.' <span class="bg-az-count">'.bg_counter_number_format($p->value).'</span></li>'. PHP_EOL;
+				$l++;
+				if ($l > $limit) break;
 			}
 			if ($number) $quote .= '</ol>'. PHP_EOL;
 			else $quote .= '</ul>'. PHP_EOL;

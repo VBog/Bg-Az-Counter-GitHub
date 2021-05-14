@@ -130,7 +130,7 @@ function getPostRating ($limit, $offset=0, $number=false) {
 	global $project;
 	$option = get_option('bg_counter_options');
 
-	$result = wp_remote_get (BG_COUNTER_STAT_SCORELIST.$project."?limit=".$limit."&offset=".$offset."&type=post");
+	$result = wp_remote_get (BG_COUNTER_STAT_SCORELIST.$project."?limit=".(2*$limit)."&offset=".$offset."&type=post");
 	if( is_wp_error( $result ) ) {
 		error_log(  PHP_EOL .current_time('mysql')." SCORES-LIST. Ошибка при получении данных с сервера: ".$result->get_error_message(), 3, BG_COUNTER_LOG );	// сообщение ошибки
 		error_log(  " " .$result->get_error_code(), 3, BG_COUNTER_LOG ); 		// ключ ошибки
@@ -151,6 +151,7 @@ function getPostRating ($limit, $offset=0, $number=false) {
 		if(false===($quote=get_transient($the_key))) {
 			if ($number) $quote = '<ol class="bg-az-top-posts">'. PHP_EOL;
 			else $quote = '<ul class="bg-az-top-posts">'. PHP_EOL;
+			$l = 0;
 			foreach ($response->data as $p) {
 				if ($p->type!='post') {
 					error_log(  PHP_EOL .current_time('mysql')." SCORES-LIST. Неверный тип:\n".$p->type, 3, BG_COUNTER_LOG );
@@ -167,11 +168,12 @@ function getPostRating ($limit, $offset=0, $number=false) {
 					error_log(  PHP_EOL .current_time('mysql')." SCORES-LIST. Нет записи: \n".$p->id, 3, BG_COUNTER_LOG );
 					continue;
 				}
-				$title = $post->post_title;
-				$link = '<a href="'. get_permalink($post).'" title="'.$title.'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-score="'.$p->score.'" data-status="'.$post->post_status.'">'.$title.'</a>';
+				$link = '<a href="'. get_permalink($post).'" title="'.the_title_attribute($id).'" data-ID="'.$p->id.'" data-type="'.$p->type.'" data-score="'.$p->score.'" data-status="'.$post->post_status.'">'.get_the_title($id).'</a>';
 				$txt_votes = bg_counter_txt_votes($votes);
 				$txt_score = $votes.'&nbsp;'.$txt_votes.':&nbsp;'.number_format((float)$p->score, 1, ',', '&nbsp;').'&nbsp;из&nbsp;5';
 				$quote .= '<li>'.$link.' -&nbsp;<span class="bg-az-count">'.$txt_score.'</span></li>'. PHP_EOL;
+				$l++;
+				if ($l > $limit) break;
 			}
 			if ($number) $quote .= '</ol>'. PHP_EOL;
 			else $quote .= '</ul>'. PHP_EOL;
