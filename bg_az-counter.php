@@ -3,7 +3,7 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.10.5
+    Version: 2.10.6
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.10.5');
+define('BG_COUNTER_VERSION', '2.10.6');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');
@@ -183,8 +183,8 @@ function azbyka_falsification_box_func( $post ){
 	else $count = "Нет счетчика";
 ?>
     <b>Количество посещений:</b> <?php echo $count; ?><br>
-	<label>Введите любое число > 0:<br>
-		<input type="number" name="azbyka_falsh_counts" value="" min=1 /><br>и нажмите кнопку "Опубликовать/Обновить".
+	<label>Введите любое число ≥ 0:<br>
+		<input type="number" name="azbyka_falsh_counts" value="" min=0 /><br>и нажмите кнопку "Опубликовать/Обновить".
 	</label>
 	<i>Если оставить поле пустым, счетчик сохранит свое истинное значение.</i><br>
     <label><input type="checkbox" name="bg_az_counter_not_counting"<?php echo (get_post_meta($post->ID, 'отключить_счетчик',true)?' checked="checked"':'');?> /> Отключить счетчик посещений</label><br>
@@ -208,7 +208,7 @@ function azbyka_falsification_update( $post_id ){
      if ( !empty( $_POST['azbyka_falsh_counts'] ) ) {
 		$counter = (int) $_POST['azbyka_falsh_counts'];
 		$path = '/post/'.$post_id;
-		if ($counter > 0) setCount ($path, $counter);
+		if ($counter >= 0) setCount ($path, $counter);
 	 }
 	update_post_meta($post_id, 'отключить_счетчик', $_POST['bg_az_counter_not_counting']);
 	update_post_meta($post_id, 'не_отображать_рейтинг', $_POST['bg_az_counter_not_rating']);
