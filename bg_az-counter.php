@@ -21,7 +21,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
+	
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -205,12 +205,12 @@ function azbyka_falsification_update( $post_id ){
     // проверяем, права пользователя, может ли он редактировать записи
     if ( !current_user_can( 'edit_post', $post_id ) ) return $post_id;
 
-     if ( isset( $_POST['azbyka_falsh_counts'] ) && $_POST['azbyka_falsh_counts'] != '') {
+     if ( isset( $_POST['azbyka_falsh_counts'] ) && $_POST['azbyka_falsh_counts'] != '' ) {
 		$counter = (int) $_POST['azbyka_falsh_counts'];
 		$path = '/post/'.$post_id;
 		if ($counter >= 0) setCount ($path, $counter);
 	 }
-	update_post_meta($post_id, 'отключить_счетчик', $_POST['bg_az_counter_not_counting']);
-	update_post_meta($post_id, 'не_отображать_рейтинг', $_POST['bg_az_counter_not_rating']);
+	if (isset($_POST['bg_az_counter_not_counting']))	update_post_meta($post_id, 'отключить_счетчик', $_POST['bg_az_counter_not_counting']);
+	if (isset($_POST['bg_az_counter_not_rating']))	update_post_meta($post_id, 'не_отображать_рейтинг', $_POST['bg_az_counter_not_rating']);
 }
 
