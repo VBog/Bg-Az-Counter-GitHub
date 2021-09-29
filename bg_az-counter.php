@@ -3,14 +3,14 @@
     Plugin Name: Bg Az-Counter 
     Plugin URI: https://bogaiskov.ru
     Description: Подсчет количества посещений страниц на базе stat.azbyka.ru
-    Version: 2.10.8
+    Version: 2.11
     Author: VBog
     Author URI: https://bogaiskov.ru 
 	License:     GPL2
 	GitHub Plugin URI: https://github.com/VBog/Bg-Az-Counter-GitHub/
 */
 
-/*  Copyright 2019  Vadim Bogaiskov  (email: vadim.bogaiskov@gmail.com)
+/*  Copyright 2019-2021  Vadim Bogaiskov  (email: vadim.bogaiskov@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 if ( !defined('ABSPATH') ) {
 	die( 'Sorry, you are not allowed to access this page directly.' ); 
 }
-define('BG_COUNTER_VERSION', '2.10.8');
+define('BG_COUNTER_VERSION', '2.11');
 
 define('BG_COUNTER_LOG', dirname(__FILE__ ).'/bg_counter.log');
 define('BG_COUNTER_STAT_COUNTERS','https://stat.azbyka.ru/counters');

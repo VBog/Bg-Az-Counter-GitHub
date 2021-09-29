@@ -101,17 +101,21 @@ class bg_counter_OnlineNowWidget extends WP_Widget {
 		$post_types = get_post_types( [ 'publicly_queryable'=>1 ] );
 		$post_types['page'] = 'page';       // встроенный тип не имеет publicly_queryable
 		unset( $post_types['attachment'] ); // удалим attachment
-		foreach ( $post_types as $post_type ) {
-			$post_types_count += wp_count_posts($post_type)->publish;
+		$post_types = apply_filters('bg-az-counter-widget__post-types', $post_types);
+		if (!empty($post_types)) {
+			foreach ( $post_types as $post_type ) {
+				$post_types_count += wp_count_posts($post_type)->publish;
+			}
 		}
- 
 ?>
 	<div class="widget-item">
 		<div class="widget-inner">
 			<span class="bg-az-counter">
 				<p><span class="bg-az-counter-title"><?php echo $subtitle1; ?></span> <span><span class="bg-az-counter-now"></span>&nbsp;<span class="bg-az-counter-unit"><?php echo $unit1; ?></span></span></p>
 				<p><span class="bg-az-counter-title"><?php echo $subtitle2; ?></span> <span class="bg-az-counter-views"></span></p>
+			<?php if ($post_types_count): ?>
 				<p><span class="bg-az-counter-title"><?php echo $subtitle3; ?></span> <span class="bg-az-counter-posts"><?php echo $post_types_count; ?></span></p>
+			<?php endif; ?>
 			</span>
 		</div>
 	</div>
